@@ -1,0 +1,25 @@
+--- 
+base_url: http://www.google.com/
+short_name: hello_world_TestCase
+commands:
+  - values:
+      - open
+      - /
+      - ''
+  - values:
+      - type
+      - q
+      - Hello World
+  - values:
+      - comment
+      - this is a comment
+      - ''
+  - values:
+      - clickAndWait
+      - btnG
+      - ''
+  - values:
+      - clickAndWait
+      - 'link=Hello world program - Wikipedia, the free encyclopedia'
+      - ''
+filename: t/test_case_data/hello_world_TestCase.html

@@ -110,10 +110,6 @@ my %command_map = (
         args         => 1,
         store        => 1,
         pass_through => 1,
-
-        #force_args => [30000],    # force arguments to pass
-        #func => 'storeExpression',
-        #func  => 'get_text',
     },
 
     # store text in the variable.
@@ -204,31 +200,32 @@ sub turn_func_into_perl {
         }
     }
     else {
-        if ( $code->{func} eq '#' ) {
+        if ( defined $code->{func} && $code->{func} eq '#' ) {
             $line = $code->{func} . make_args( $code, @args );
         }
-        elsif ( $code->{store} ) {
+        elsif ( defined $code->{store} && $code->{store} ) {
             my $varname = pop @args;
             $line = 'my $' . "$varname = ";
             if ( $code->{func} ) {
-                $line .= make_args( $code, @args ) . ";";
-            }
-            else {
                 $line .=
                     "\$sel->"
                   . $code->{func} . '('
                   . make_args( $code, @args ) . ');';
+            }
+            else {
+                $line .= make_args( $code, @args ) . ";";
             }
         }
         else {
             $line =
               '$sel->' . $code->{func} . '(' . make_args( $code, @args ) . ');';
         }
-        if ( $code->{repeat} ) {
-            my @lines;
-            push( @lines, $line ) for ( 1 .. $code->{repeat} );
-            $line = join( "\n", @lines );
-        }
+
+        #        if ( $code->{repeat} ) {
+        #            my @lines;
+        #            push( @lines, $line ) for ( 1 .. $code->{repeat} );
+        #            $line = join( "\n", @lines );
+        #        }
         if ( $code->{wait} ) {
             $line =~ s/;$//;
             $line = <<EOF;
@@ -239,6 +236,7 @@ WAIT: {
     }
     fail("timeout");
 }
+pass;
 EOF
             chomp $line;
         }
@@ -261,7 +259,7 @@ sub make_args {
         }
         map { s/^exact:// } @args;
 
-        if ( $code->{func} eq '#' ? 0 : 1 ) {
+        if ( defined $code->{func} && $code->{func} eq '#' ? 0 : 1 ) {
             $str .= join( ', ', map { quote($_) } @args );
         }
         else {
@@ -277,7 +275,7 @@ sub quote {
     my $quote_char = shift;
 
     $str =~ s,<br />,\\n,g;
-    unless ( $str =~ s/^\$\{(.*)\}/\$\1/ ) {
+    unless ( $str =~ s/^\$\{(.*)\}/\$$1/ ) {
         $str =~ s/\Q$_\E/\\$_/g for qw(" % @ $);
         $str = '"' . $str . '"';
     }

@@ -4,11 +4,23 @@ short_name: hello_world_TestCase
 commands:
   - values:
       - storeText
+      - //*
+      - a
+  - values:
+      - store
       - Hello World
       - search_query
   - values:
       - open
       - /
+      - ''
+  - values:
+      - waitForPageToLoad
+      - 30000
+      - ''
+  - values:
+      - waitForElementPresent
+      - btnG
       - ''
   - values:
       - type
@@ -22,6 +34,10 @@ commands:
       - clickAndWait
       - btnG
       - ''
+  - values:
+      - verifyText
+      - 'link=Hello world program - Wikipedia, the free encyclopedia'
+      - 'Hello world program - Wikipedia, the free encyclopedia'
   - values:
       - clickAndWait
       - 'link=Hello world program - Wikipedia, the free encyclopedia'

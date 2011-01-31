@@ -3,60 +3,70 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head profile="http://selenium-ide.openqa.org/profiles/test-case">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link rel="selenium.base" href="http://www.google.com/" />
-<title>hello_word_test_case</title>
+<link rel="selenium.base" href="http://www.google.co.jp/" />
+<title>in</title>
 </head>
 <body>
 <table cellpadding="1" cellspacing="1" border="1">
 <thead>
-<tr><td rowspan="1" colspan="3">hello_word_test_case</td></tr>
+<tr><td rowspan="1" colspan="3">in</td></tr>
 </thead><tbody>
-<tr>
-	<td>storeText</td>
-	<td>//*</td>
-	<td>a</td>
-</tr>
-<tr>
-	<td>store</td>
-	<td>Hello World</td>
-	<td>search_query</td>
-</tr>
 <tr>
 	<td>open</td>
 	<td>/</td>
 	<td></td>
 </tr>
 <tr>
-	<td>waitForPageToLoad</td>
-	<td>30000</td>
+	<td>assertTitle</td>
+	<td>Google</td>
 	<td></td>
 </tr>
 <tr>
-	<td>waitForElementPresent</td>
-	<td>btnG</td>
+	<td>clickAndWait</td>
+	<td>link=検索オプション</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTitle</td>
+	<td>Google 検索オプション</td>
 	<td></td>
 </tr>
 <tr>
 	<td>type</td>
-	<td>q</td>
-    <td>${search_query}</td>
+	<td>as_q</td>
+	<td>内閣府</td>
 </tr>
-<!--this is a comment-->
+<tr>
+	<td>select</td>
+	<td>num</td>
+	<td>label=100 件</td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>lr</td>
+	<td>label=日本語</td>
+</tr>
 <tr>
 	<td>clickAndWait</td>
 	<td>btnG</td>
 	<td></td>
 </tr>
 <tr>
-	<td>verifyText</td>
-	<td>link=Hello world program - Wikipedia, the free encyclopedia</td>
-	<td>Hello world program - Wikipedia, the free encyclopedia</td>
+	<td>assertTitle</td>
+	<td>内閣府 - Google 検索</td>
+	<td></td>
 </tr>
 <tr>
 	<td>clickAndWait</td>
-	<td>link=Hello world program - Wikipedia, the free encyclopedia</td>
+	<td>link=内閣府ホームページ</td>
 	<td></td>
 </tr>
+<tr>
+	<td>assertTitle</td>
+	<td>内閣府ホームページ</td>
+	<td></td>
+</tr>
+
 </tbody></table>
 </body>
 </html>

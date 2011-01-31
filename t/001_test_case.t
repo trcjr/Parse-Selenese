@@ -13,7 +13,7 @@ use Cwd;
 
 #use Test::Base;
 #use String::Diff;
-#use Algorithm::Diff;
+use Algorithm::Diff;
 
 use_ok("Parse::Selenese");
 use_ok("Parse::Selenese::TestCase");
@@ -69,6 +69,10 @@ sub _test_perl {
     close $io;
 
     is( $case->as_perl, $expected, 'output precisely - ' . $case->filename );
+    use Data::Dumper;
+    warn Dumper Algorithm::Diff::diff(
+      map [split "\n" => $_], $case->as_perl, $expected
+    );
 }
 
 sub _test_yaml {

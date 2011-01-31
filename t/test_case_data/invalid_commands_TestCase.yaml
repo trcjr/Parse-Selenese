@@ -1,0 +1,9 @@
+--- 
+base_url: http://www.google.com/
+short_name: invalid_commands_TestCase
+commands:
+  - values:
+      - opentoast
+      - /
+      - ''
+filename: t/test_case_data/invalid_commands_TestCase.html

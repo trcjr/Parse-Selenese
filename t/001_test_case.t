@@ -67,6 +67,7 @@ sub _test_perl {
     open my $io, '<', $perl_data_file or die $!;
     my $expected = join( '', <$io> );
     close $io;
+
     is( $case->as_perl, $expected, 'output precisely - ' . $case->filename );
 }
 
@@ -89,7 +90,7 @@ sub _test_yaml {
         my $yaml_command_values = $yaml_data->{commands}->[$idx]->{values};
 
         is $command_values->[$_] => $yaml_command_values->[$_],
-          $case->filename . " command num $idx value $_"
+          $case->filename . " command num $idx value $_ - $command_values->[$_]"
           for 0 .. @$command_values - 1;
     }
 }

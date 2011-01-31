@@ -106,6 +106,16 @@ my %command_map = (
         args => 1,
     },
 
+    store => {
+        args         => 1,
+        store        => 1,
+        pass_through => 1,
+
+        #force_args => [30000],    # force arguments to pass
+        #func => 'storeExpression',
+        #func  => 'get_text',
+    },
+
     # store text in the variable.
     storeText => {
         args  => 1,
@@ -169,7 +179,6 @@ sub as_perl {
     my $self = shift;
 
     my $line;
-    warn $self->values->[0];
     my $code = $command_map{ $self->{values}->[0] };
     my @args = @{ $self->{values} };
     shift @args;
@@ -200,10 +209,16 @@ sub turn_func_into_perl {
         }
         elsif ( $code->{store} ) {
             my $varname = pop @args;
-            $line =
-                "my \$$varname = \$sel->"
-              . $code->{func} . '('
-              . make_args( $code, @args ) . ');';
+            $line = 'my $' . "$varname = ";
+            if ( $code->{func} ) {
+                $line .= make_args( $code, @args ) . ";";
+            }
+            else {
+                $line .=
+                    "\$sel->"
+                  . $code->{func} . '('
+                  . make_args( $code, @args ) . ');';
+            }
         }
         else {
             $line =
@@ -258,11 +273,14 @@ sub make_args {
 }
 
 sub quote {
-    my $str = shift;
+    my $str        = shift;
+    my $quote_char = shift;
 
     $str =~ s,<br />,\\n,g;
-    $str =~ s/\Q$_\E/\\$_/g for qw(" % @ $);
-    $str = '"' . $str . '"';
+    unless ( $str =~ s/^\$\{(.*)\}/\$\1/ ) {
+        $str =~ s/\Q$_\E/\\$_/g for qw(" % @ $);
+        $str = '"' . $str . '"';
+    }
     return $str;
 }
 

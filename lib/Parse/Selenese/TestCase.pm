@@ -145,7 +145,6 @@ sub as_perl {
       ( $self->{base_url}, Text::MicroTemplate::encoded_string($perl_code) );
 
     # test.mtをテンプレートとして読み込む
-    warn File::Basename::dirname(__FILE__) . "/test.mt";
     open my $io, '<', File::Basename::dirname(__FILE__) . "/test.mt" or die $!;
     my $template = join '', <$io>;
     close $io;

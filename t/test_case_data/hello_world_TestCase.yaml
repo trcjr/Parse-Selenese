@@ -3,13 +3,17 @@ base_url: http://www.google.com/
 short_name: hello_world_TestCase
 commands:
   - values:
+      - storeText
+      - Hello World
+      - search_query
+  - values:
       - open
       - /
       - ''
   - values:
       - type
       - q
-      - Hello World
+      - ${search_query}
   - values:
       - comment
       - this is a comment

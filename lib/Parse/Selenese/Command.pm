@@ -4,7 +4,6 @@ use Carp ();
 use HTML::TreeBuilder;
 use Parse::Selenese::TestCase;
 use Moose;
-use MooseX::FollowPBP;
 
 has 'values' =>
   ( isa => 'ArrayRef', is => 'rw', required => 0, default => sub { [] } );

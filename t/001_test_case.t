@@ -25,12 +25,10 @@ my $case;
 #
 $case = Parse::Selenese::TestCase->new();
 
-is( $case->get_filename, undef,
-    "TestCase without filename has undefined filename" );
-is( scalar( @{ $case->get_commands } ),
-    0, "TestCase without commans commands 0 commands" );
-is( $case->get_base_url, undef, "Unparsed TestCase has no base_url" );
-is( $case->get_content,  undef, "Unparsed TestCase has no content" );
+ok !$case->filename, 'TestCase without filename has undefined filename';
+ok !@{ $case->commands }, 'TestCase without commans commands 0 commands';
+ok !$case->base_url, "Unparsed TestCase has no base_url";
+ok !$case->content,  "Unparsed TestCase has no content";
 
 ##
 ## TestCase from file
@@ -48,59 +46,52 @@ foreach my $test_selenese_file (@yaml_data_files) {
     my ( $file, $dir, $ext ) =
       File::Basename::fileparse( $test_selenese_file, qr/\.[^.]*/ );
     my $yaml_data_file = "$dir/$file.yaml";
-    next unless -e $yaml_data_file;
 
     # Parse the html file
     $case = Parse::Selenese::TestCase->new($test_selenese_file);
 
-    # Load the yaml dump that matches
-    my $yaml_data = LoadFile($yaml_data_file);
+    # Test against the saved yaml
+    _test_yaml( $case, $yaml_data_file ) if -e $yaml_data_file;
 
-    is $case->get_filename => $yaml_data->{filename}, $case->get_file;
-
-    is(
-        $case->get_filename,
-        $yaml_data->{filename},
-        $case->get_filename . " filename"
-    );
-
-    is(
-        $case->get_base_url,
-        $yaml_data->{base_url},
-        $case->get_filename . " base_url"
-    );
-
-    is(
-        scalar @{ $case->get_commands },
-        scalar @{ $yaml_data->{commands} },
-        $case->get_filename . " number of commands in"
-    );
-
-    foreach my $command_index ( 0 .. scalar @{ $case->get_commands } - 1 ) {
-        my $command        = @{ $case->get_commands }[$command_index];
-        my $command_values = $command->{values};
-        my $yaml_command_values =
-          $yaml_data->{commands}[$command_index]->{values};
-        foreach my $i ( 0 .. scalar @{$command_values} - 1 ) {
-            my $command_value      = @{$command_values}[$i];
-            my $yaml_command_value = @{$yaml_command_values}[$i];
-            my $_test_name =
-                $case->get_filename
-              . " command num "
-              . $command_index
-              . " value $i";
-            is( $command_value, $yaml_command_value, $_test_name );
-        }
-    }
-
+    # Test against the saved perl
     my $perl_data_file = "$dir/$file.pl";
-    next unless -e $perl_data_file;
+    _test_perl( $case, $perl_data_file ) if -e $perl_data_file;
 
+}
+
+sub _test_perl {
+    my $case           = shift;
+    my $perl_data_file = shift;
+
+    # Read the saved perl code
     open my $io, '<', $perl_data_file or die $!;
     my $expected = join( '', <$io> );
     close $io;
-    is( $case->as_perl, $expected,
-        'output precisely - ' . $case->get_filename );
+    is( $case->as_perl, $expected, 'output precisely - ' . $case->filename );
+}
+
+sub _test_yaml {
+    my $case           = shift;
+    my $yaml_data_file = shift;
+
+    # Load the yaml dump that matches
+    my $yaml_data = LoadFile($yaml_data_file);
+
+    is $case->filename => $yaml_data->{filename}, $case->filename . " filename";
+    is $case->base_url => $yaml_data->{base_url}, $case->filename . " base_url";
+
+    is scalar @{ $case->commands } => scalar @{ $yaml_data->{commands} },
+      $case->filename . " number of commands in";
+
+    for my $idx ( 0 .. @{ $case->commands } - 1 ) {
+        my $command             = $case->commands->[$idx];
+        my $command_values      = $command->{values};
+        my $yaml_command_values = $yaml_data->{commands}->[$idx]->{values};
+
+        is $command_values->[$_] => $yaml_command_values->[$_],
+          $case->filename . " command num $idx value $_"
+          for 0 .. @$command_values - 1;
+    }
 }
 
 done_testing();

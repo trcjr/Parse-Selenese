@@ -13,7 +13,6 @@ use Modern::Perl;
 
 package Parse::Selenese::TestCase;
 use Moose;
-use MooseX::FollowPBP;
 
 has 'filename' => ( isa => 'Str', is => 'rw', required => 0 );
 has 'path' => ( isa => 'Str', is => 'rw', required => 0 );
@@ -44,22 +43,22 @@ around BUILDARGS => sub {
 
 sub BUILD {
     my $self = shift;
-    $self->parse if $self->get_filename;
+    $self->parse if $self->filename;
 }
 
 sub short_name {
     my $self = shift;
-    my $x    = File::Basename::basename( $self->get_filename );
+    my $x    = File::Basename::basename( $self->filename );
     return ( File::Basename::fileparse( $x, qr/\.[^.]*/ ) )[0];
 }
 
 sub parse {
     my $self = shift;
-    my $filename = $self->get_filename or die "specify a filename";
+    my $filename = $self->filename or die "specify a filename";
 
     die "Can't read $filename" unless -r $filename;
 
-    return if scalar @{$self->get_commands};
+    return if scalar @{$self->commands};
     return $self->_parse;
 }
 
@@ -73,12 +72,12 @@ sub _parse {
     my $self    = shift;
     my $content = shift;
 
-    return if scalar @{$self->get_commands};
+    return if scalar @{$self->commands};
 
     my $tree = HTML::TreeBuilder->new;
     $tree->store_comments(1);
-    if ( $self->get_filename ) {
-        $tree->parse_file( $self->get_filename );
+    if ( $self->filename ) {
+        $tree->parse_file( $self->filename );
     }
     else {
         $tree->parse_content($content);
@@ -87,7 +86,7 @@ sub _parse {
     # base_urlを<link>から見つける
     foreach my $link ( $tree->find('link') ) {
         if ( $link->attr('rel') eq 'selenium.base' ) {
-            $self->set_base_url( $link->attr('href') );
+            $self->base_url( $link->attr('href') );
         }
     }
 
@@ -127,7 +126,7 @@ sub _parse {
         my $command = Parse::Selenese::Command->new( \@values );
         push( @commands, $command );
     }
-    $self->set_commands( \@commands );
+    $self->commands( \@commands );
     $tree = $tree->delete;
 }
 

@@ -21,11 +21,6 @@ has 'commands' =>
   ( isa => 'ArrayRef', is => 'rw', required => 0, default => sub { [] } );
 has 'content' => ( isa => 'Str', is => 'rw', required => 0 );
 
-#our $VERSION = '0.01';
-#require Exporter;
-#our @EXPORT_OK = qw(case_to_perl);
-#*import = \&Exporter::import;
-
 around BUILDARGS => sub {
     my $orig  = shift;
     my $class = shift;
@@ -57,15 +52,13 @@ sub parse {
     my $filename = $self->filename or die "specify a filename";
 
     die "Can't read $filename" unless -r $filename;
-
-    return if scalar @{$self->commands};
     return $self->_parse;
 }
 
 sub parse_content {
     my $self    = shift;
     my $content = shift;
-    return $self->_parse($content);
+    return $self->_parse( Encode::decode_utf8 $content );
 }
 
 sub _parse {
@@ -232,3 +225,7 @@ sub as_html {
 }
 
 1;
+__END__
+
+=head1 Parse Selenium
+I like to parse selenium

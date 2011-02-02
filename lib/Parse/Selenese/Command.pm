@@ -182,11 +182,9 @@ sub as_perl {
         $line = turn_func_into_perl( $code, @args );
     }
     if ($line) {
-        return $line . "\n";
+        $line .= "\n";
     }
-    else {
-        return undef;
-    }
+    return $line;
 }
 
 sub turn_func_into_perl {

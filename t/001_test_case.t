@@ -6,7 +6,8 @@ use YAML qw'freeze thaw LoadFile';
 #use Test::More tests => 3;
 use File::Find qw(find);
 use File::Spec;
-use Test::More;
+use Test::Most;
+use Test::Exception;
 use Data::Dumper;
 use FindBin;
 use Cwd;
@@ -29,12 +30,12 @@ ok !$case->filename, 'TestCase without filename has undefined filename';
 ok !@{ $case->commands }, 'TestCase without commans commands 0 commands';
 ok !$case->base_url, "Unparsed TestCase has no base_url";
 ok !$case->content,  "Unparsed TestCase has no content";
+dies_ok { Parse::Selenese::TestCase->new("some_file"); } "dies parsing a non existent file";
+dies_ok { my $c = Parse::Selenese::TestCase->new(); $c->parse(); } "dies trying to parse when given nothing to parse";
 
 ##
 ## TestCase from file
 ##
-
-#is( $case->short_name, "hello_world_test_case", "test case short name" );
 
 my $case_data_dir = "$FindBin::Bin/test_case_data";
 my @yaml_data_files;
@@ -49,6 +50,16 @@ foreach my $test_selenese_file (@yaml_data_files) {
 
     # Parse the html file
     $case = Parse::Selenese::TestCase->new($test_selenese_file);
+    $case->parse;
+
+    # Read the saved perl code
+    open my $io, '<', $test_selenese_file or die $!;
+    my $content = join( '', <$io> );
+    close $io;
+
+    my $case2 = Parse::Selenese::TestCase->new();
+    $case2->parse_content($content);
+    $case2->parse_content($content);
 
     # Test against the saved yaml
     _test_yaml( $case, $yaml_data_file ) if -e $yaml_data_file;
@@ -68,11 +79,12 @@ sub _test_perl {
     my $expected = join( '', <$io> );
     close $io;
 
-    is( $case->as_perl, $expected, 'output precisely - ' . $case->filename );
-    use Data::Dumper;
-    warn Dumper Algorithm::Diff::diff(
-      map [split "\n" => $_], $case->as_perl, $expected
-    );
+    is( $case->as_perl, $expected, $case->filename . ' - output precisely' );
+
+    #    use Data::Dumper;
+    #    warn Dumper Algorithm::Diff::diff(
+    #      map [split "\n" => $_], $case->as_perl, $expected
+    #    );
 }
 
 sub _test_yaml {
@@ -81,6 +93,7 @@ sub _test_yaml {
 
     # Load the yaml dump that matches
     my $yaml_data = LoadFile($yaml_data_file);
+    is $case->short_name => $yaml_data->{short_name}, $case->filename . " test case short name";
 
     is $case->filename => $yaml_data->{filename}, $case->filename . " filename";
     is $case->base_url => $yaml_data->{base_url}, $case->filename . " base_url";

@@ -1,13 +1,29 @@
 use strict;
-
 package Parse::Selenese::Command;
+use Moose;
+extends 'Parse::Selenese';
+use Parse::Selenese::TestCase;
 use Carp ();
 use HTML::TreeBuilder;
-use Parse::Selenese::TestCase;
-use Moose;
+use Template;
 
 has 'values' =>
   ( isa => 'ArrayRef', is => 'rw', required => 0, default => sub { [] } );
+
+has 'element' => (
+    is      => 'ro',
+    lazy    => 1,
+    builder => '_element',
+);
+
+my $_selenese_command_template=<<'END_SELENESE_COMMAND_TEMPLATE';
+<tr>
+[% FOREACH value = values -%]
+	<td>[% value %]</td>
+[% END %]</tr>
+END_SELENESE_COMMAND_TEMPLATE
+
+my $_selenese_comment_template="<!--[% values.1 %]-->\n";
 
 my %command_map = (
 
@@ -162,6 +178,7 @@ my %command_map = (
 around BUILDARGS => sub {
     my $orig  = shift;
     my $class = shift;
+    #SUPER::BUILDARGS();
 
     if ( @_ == 1 && ref $_[0] ) {
         return $class->$orig( values => $_[0], );
@@ -185,6 +202,46 @@ sub as_perl {
         $line .= "\n";
     }
     return $line;
+}
+
+sub _element {
+    my $self = shift;
+
+    my $element = HTML::Element->new('tr');
+    if ( $self->{values}->[0] eq "comment" ) {
+        $element = HTML::Element->new('~comment');
+        $element->attr( 'text', $self->{values}->[1] );
+
+    }
+    else {
+        $element = HTML::Element->new('tr');
+        foreach my $value ( @{ $self->{values} } ) {
+            my $td = HTML::Element->new('td')->unshift_content($value);
+            $element->push_content($td);
+        }
+    }
+    return $element;
+}
+
+sub _get_template {
+    my $self = shift;
+
+    if ($self->element->tag eq "~comment") {
+        return $_selenese_comment_template;
+    }
+    return $_selenese_command_template;
+}
+
+sub as_html {
+    my $self = shift;
+    my $tt = Template->new;
+    my $template = $self->_get_template;
+    my $output = '';
+    my $vars = {
+        values => $self->values,
+    };
+    $tt->process(\$template, $vars, \$output);
+    return $output;
 }
 
 sub turn_func_into_perl {

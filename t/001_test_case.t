@@ -32,17 +32,39 @@ ok !$case->base_url, "Unparsed TestCase has no base_url";
 ok !$case->content,  "Unparsed TestCase has no content";
 dies_ok { Parse::Selenese::TestCase->new("some_file"); } "dies parsing a non existent file";
 dies_ok { my $c = Parse::Selenese::TestCase->new(); $c->parse(); } "dies trying to parse when given nothing to parse";
+#s_ok { my $c = Parse::Selenese::TestCase->new(); $c->parse(); } "dies trying to parse when given nothing to parse";
 
 ##
 ## TestCase from file
 ##
 
 my $case_data_dir = "$FindBin::Bin/test_case_data";
-my @yaml_data_files;
-find sub { push @yaml_data_files, $File::Find::name if /_TestCase\.html$/ },
+my @selenese_data_files;
+find sub { push @selenese_data_files, $File::Find::name if /_TestCase\.html$/ },
   $case_data_dir;
 
-foreach my $test_selenese_file (@yaml_data_files) {
+$case = Parse::Selenese::TestCase->new();
+
+my $not_existing_file = "t/this_file_does_not_exist";
+dies_ok {
+    $case->filename($not_existing_file);
+    $case->parse;
+}
+"$not_existing_file - dies trying to parse file that does not exist";
+
+lives_ok {
+    $case->filename( $selenese_data_files[0] );
+    $case->parse;
+}
+$selenese_data_files[0] . " - Lives parsing a file";
+
+lives_ok {
+    $case->parse;
+}
+"parse again!";
+
+#done_testing();
+foreach my $test_selenese_file (@selenese_data_files) {
     $test_selenese_file = File::Spec->abs2rel($test_selenese_file);
     my ( $file, $dir, $ext ) =
       File::Basename::fileparse( $test_selenese_file, qr/\.[^.]*/ );
@@ -57,9 +79,18 @@ foreach my $test_selenese_file (@yaml_data_files) {
     my $content = join( '', <$io> );
     close $io;
 
+    #is( $case->as_html, $content, $case->filename . ' - selenese output precisely' );
+
+    #unified_diff;
+    #eq_or_diff $case->as_html, $content , $case->filename . ' - selenese output precisely' ;
+
     my $case2 = Parse::Selenese::TestCase->new();
     $case2->parse_content($content);
-    $case2->parse_content($content);
+    #$case2->parse_content($content);
+    $case->parse();
+
+    # Test against the original parsed file
+    _test_selenese ( $case ) ;
 
     # Test against the saved yaml
     _test_yaml( $case, $yaml_data_file ) if -e $yaml_data_file;
@@ -68,6 +99,12 @@ foreach my $test_selenese_file (@yaml_data_files) {
     my $perl_data_file = "$dir/$file.pl";
     _test_perl( $case, $perl_data_file ) if -e $perl_data_file;
 
+}
+sub _test_selenese {
+    my $case = shift;
+    for my $command (@{$case->commands}) {
+        is scalar @{ $command->values } => 3, "Three values in command";
+    }
 }
 
 sub _test_perl {

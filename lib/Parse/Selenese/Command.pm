@@ -1,11 +1,11 @@
 use strict;
-package Parse::Selenese::Command;
-use Moose;
-extends 'Parse::Selenese';
 use Parse::Selenese::TestCase;
 use Carp ();
 use HTML::TreeBuilder;
 use Template;
+
+package Parse::Selenese::Command;
+use Moose;
 
 has 'values' =>
   ( isa => 'ArrayRef', is => 'rw', required => 0, default => sub { [] } );
@@ -178,7 +178,6 @@ my %command_map = (
 around BUILDARGS => sub {
     my $orig  = shift;
     my $class = shift;
-    #SUPER::BUILDARGS();
 
     if ( @_ == 1 && ref $_[0] ) {
         return $class->$orig( values => $_[0], );

@@ -6,7 +6,7 @@ use HTML::TreeBuilder;
 use Carp ();
 
 package Parse::Selenese::Base;
-use Moose;
+use Moose::Role;
 
 has 'content' => ( isa => 'Str', is => 'rw', required => 0 );
 has 'filename' => ( isa => 'Str', is => 'rw', required => 0 );
@@ -30,13 +30,10 @@ sub _parse {
     $tree->store_comments(1);
     if ( $self->filename ) {
         $tree->parse_file( $self->filename );
-        warn "nope";
     } elsif ( $self->content ) {
         $tree->parse_content($content);
-        warn "nope2";
     }
 
-    warn "ope3";
     # base_urlを<link>から見つける
     foreach my $link ( $tree->find('link') ) {
         if ( $link->attr('rel') eq 'selenium.base' ) {

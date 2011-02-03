@@ -30,8 +30,11 @@ ok !$case->filename, 'TestCase without filename has undefined filename';
 ok !@{ $case->commands }, 'TestCase without commans commands 0 commands';
 ok !$case->base_url, "Unparsed TestCase has no base_url";
 ok !$case->content,  "Unparsed TestCase has no content";
-dies_ok { Parse::Selenese::TestCase->new("some_file"); } "dies parsing a non existent file";
-dies_ok { my $c = Parse::Selenese::TestCase->new(); $c->parse(); } "dies trying to parse when given nothing to parse";
+dies_ok { Parse::Selenese::TestCase->new("some_file"); }
+"dies parsing a non existent file";
+dies_ok { my $c = Parse::Selenese::TestCase->new(); $c->parse(); }
+"dies trying to parse when given nothing to parse";
+
 #s_ok { my $c = Parse::Selenese::TestCase->new(); $c->parse(); } "dies trying to parse when given nothing to parse";
 
 ##
@@ -74,78 +77,120 @@ foreach my $test_selenese_file (@selenese_data_files) {
     $case = Parse::Selenese::TestCase->new($test_selenese_file);
     $case->parse;
 
-    # Read the saved perl code
-    open my $io, '<', $test_selenese_file or die $!;
-    my $content = join( '', <$io> );
-    close $io;
+#is( $case->as_html, $content, $case->filename . ' - selenese output precisely' );
 
-    #is( $case->as_html, $content, $case->filename . ' - selenese output precisely' );
-
-    #unified_diff;
-    #eq_or_diff $case->as_html, $content , $case->filename . ' - selenese output precisely' ;
-
-    my $case2 = Parse::Selenese::TestCase->new();
-    $case2->parse_content($content);
     #$case2->parse_content($content);
     $case->parse();
 
     # Test against the original parsed file
-    _test_selenese ( $case ) ;
+    _test_selenese($case, $test_selenese_file);
 
     # Test against the saved yaml
-    _test_yaml( $case, $yaml_data_file ) if -e $yaml_data_file;
+    _test_yaml( $case, $yaml_data_file );
 
     # Test against the saved perl
     my $perl_data_file = "$dir/$file.pl";
-    _test_perl( $case, $perl_data_file ) if -e $perl_data_file;
+    _test_perl( $case, $perl_data_file );
 
 }
+
 sub _test_selenese {
-    my $case = shift;
-    for my $command (@{$case->commands}) {
+    my $case               = shift;
+    my $test_selenese_file = shift;
+
+    # Read the saved perl code
+    open my $io, '<', $test_selenese_file;
+    my $content = join( '', <$io> );
+    close $io;
+    unified_diff;
+    eq_or_diff $content, $case->as_html, 
+      $case->filename . ' - selenese output precisely';
+
+    for my $command ( @{ $case->commands } ) {
         is scalar @{ $command->values } => 3, "Three values in command";
     }
+    my $case2 = Parse::Selenese::TestCase->new();
+    $case2->parse_content($content);
 }
 
 sub _test_perl {
     my $case           = shift;
     my $perl_data_file = shift;
 
-    # Read the saved perl code
-    open my $io, '<', $perl_data_file or die $!;
-    my $expected = join( '', <$io> );
-    close $io;
+    my $test_count = 0;
+    for my $idx ( 0 .. @{ $case->commands } - 1 ) {
+        my $command        = $case->commands->[$idx];
+        my $command_values = $command->{values};
+        $test_count++ for 0 .. @$command_values - 1;
+    }
 
-    is( $case->as_perl, $expected, $case->filename . ' - output precisely' );
+  SKIP: {
+        eval {
 
-    #    use Data::Dumper;
-    #    warn Dumper Algorithm::Diff::diff(
-    #      map [split "\n" => $_], $case->as_perl, $expected
-    #    );
+            #my $perl_data = LoadFile($perl_data_file);
+            # Read the saved perl code
+            open my $io, '<', $perl_data_file
+              or die "Can't open perl data file";
+            my $expected = join( '', <$io> );
+            close $io;
+        };
+        if ($@) {
+            skip "perl_data_file not found", $test_count;
+        }
+        open my $io, '<', $perl_data_file;
+        my $expected = join( '', <$io> );
+        close $io;
+
+        unified_diff;
+        eq_or_diff $expected, $case->as_perl,
+          $case->filename . ' - selenese output precisely';
+
+        #    use Data::Dumper;
+        #    warn Dumper Algorithm::Diff::diff(
+        #      map [split "\n" => $_], $case->as_perl, $expected
+        #    );
+    }
 }
 
 sub _test_yaml {
     my $case           = shift;
     my $yaml_data_file = shift;
-
-    # Load the yaml dump that matches
-    my $yaml_data = LoadFile($yaml_data_file);
-    is $case->short_name => $yaml_data->{short_name}, $case->filename . " test case short name";
-
-    is $case->filename => $yaml_data->{filename}, $case->filename . " filename";
-    is $case->base_url => $yaml_data->{base_url}, $case->filename . " base_url";
-
-    is scalar @{ $case->commands } => scalar @{ $yaml_data->{commands} },
-      $case->filename . " number of commands in";
-
+    my $test_count     = 0;
     for my $idx ( 0 .. @{ $case->commands } - 1 ) {
-        my $command             = $case->commands->[$idx];
-        my $command_values      = $command->{values};
-        my $yaml_command_values = $yaml_data->{commands}->[$idx]->{values};
+        my $command        = $case->commands->[$idx];
+        my $command_values = $command->{values};
+        $test_count++ for 0 .. @$command_values - 1;
+    }
 
-        is $command_values->[$_] => $yaml_command_values->[$_],
-          $case->filename . " command num $idx value $_ - $command_values->[$_]"
-          for 0 .. @$command_values - 1;
+  SKIP: {
+        eval { my $yaml_data = LoadFile($yaml_data_file); };
+        if ($@) {
+            skip "$yaml_data_file not found", $test_count;
+        }
+        my $yaml_data = LoadFile($yaml_data_file);
+
+        # Load the yaml dump that matches
+        is $case->short_name => $yaml_data->{short_name},
+          $case->filename . " test case short name";
+
+        is $case->filename => $yaml_data->{filename},
+          $case->filename . " filename";
+        is $case->base_url => $yaml_data->{base_url},
+          $case->filename . " base_url";
+
+        is scalar @{ $case->commands } => scalar @{ $yaml_data->{commands} },
+          $case->filename . " number of commands in";
+
+        for my $idx ( 0 .. @{ $case->commands } - 1 ) {
+            my $command             = $case->commands->[$idx];
+            my $command_values      = $command->{values};
+            my $yaml_command_values = $yaml_data->{commands}->[$idx]->{values};
+
+            is $command_values->[$_] => $yaml_command_values->[$_],
+              $case->filename
+              . " command num $idx value $_ - $command_values->[$_]"
+              for 0 .. @$command_values - 1;
+        }
     }
 }
 

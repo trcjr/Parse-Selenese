@@ -7,7 +7,6 @@ use YAML qw'freeze thaw LoadFile';
 use File::Find qw(find);
 use File::Spec;
 use Test::Most;
-use Test::Exception;
 use Data::Dumper;
 use FindBin;
 use Cwd;

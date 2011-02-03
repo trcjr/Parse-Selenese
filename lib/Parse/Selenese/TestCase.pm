@@ -1,7 +1,7 @@
 package Parse::Selenese::TestCase;
 use Moose;
 
-extends 'Parse::Selenese::Base';
+with 'Parse::Selenese::Base';
 
 use Carp ();
 use Encode;
@@ -92,9 +92,7 @@ sub _parse {
     my $self    = shift;
     my $content = shift;
 
-    return unless my $tree = $self->SUPER::_parse();
-
-    warn "HIIaaa";
+    return unless my $tree = $self->SUPER::_parse;
 
     # <tbody>以下からコマンドを抽出
     return unless my $tbody = $tree->find('tbody');

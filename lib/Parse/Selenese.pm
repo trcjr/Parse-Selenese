@@ -5,7 +5,7 @@ use File::Basename;
 use HTML::TreeBuilder;
 use Carp ();
 
-package Parse::Selenese::Base;
+package Parse::Selenese;
 use Moose::Role;
 
 has 'content' => ( isa => 'Str', is => 'rw', required => 0 );
@@ -15,24 +15,35 @@ has 'base_url' => ( isa => 'Str', is => 'rw', required => 0 );
 has 'title' => ( isa => 'Str', is => 'rw', required => 0 );
 has 'thead' => ( isa => 'Str', is => 'rw', required => 0 );
 
+requires 'parse';
+
 sub BUILD {
     my $self = shift;
-    $self->parse if $self->filename || $self->content;
+    $self->parse if defined $self->filename || defined $self->content;
 }
 
 sub _parse {
-    my $self    = shift;
-    my $content = shift;
+    my $self = shift;
+
+    if ( defined ($self->content) && defined ($self->filename) ){
+        unless (-r $self->filename) {
+            die "file isn't readable";
+        }
+    } else {
+        die "file isn't defined";
+    }
 
     return if scalar @{$self->commands};
 
     my $tree = HTML::TreeBuilder->new;
     $tree->store_comments(1);
-    if ( $self->filename ) {
-        $tree->parse_file( $self->filename );
-    } elsif ( $self->content ) {
-        $tree->parse_content($content);
-    }
+
+    #if ( $self->filename ) {
+    #    $tree->parse_file( $self->filename );
+    #} elsif ( $self->content ) {
+    #    $tree->parse_content( $content );
+    #}
+    #$tree->parse;
 
     # base_urlを<link>から見つける
     foreach my $link ( $tree->find('link') ) {
@@ -75,27 +86,6 @@ sub parse_content {
     $self->content( Encode::decode_utf8 $content );
     $self->_parse;
 }
-
-sub parse {
-    my $self = shift;
-    #my $filename = $self->filename or die "specify a filename";
-
-    if (defined ($self->filename)) {
-        unless (-r $self->filename) {
-            die "file isn't readable";
-        }
-    } else {
-        die "file isn't defined";
-    }
-    #die "Can't read " .$self->filename unless defined $self->filename && -r $self->filename;
-    $self->_parse
-}
-
-package Parse::Selenese;
-use Moose;
-
-
-#use MooseX::FollowPBP;
 
 
 1;

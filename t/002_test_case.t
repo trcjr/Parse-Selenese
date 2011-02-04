@@ -61,11 +61,6 @@ lives_ok {
 }
 $selenese_data_files[0] . " - Lives parsing a file";
 
-lives_ok {
-    $case->parse;
-}
-"parse again!";
-
 #done_testing();
 foreach my $test_selenese_file (@selenese_data_files) {
     $test_selenese_file = File::Spec->abs2rel($test_selenese_file);
@@ -83,14 +78,14 @@ foreach my $test_selenese_file (@selenese_data_files) {
     $case->parse();
 
     # Test against the original parsed file
-    _test_selenese($case, $test_selenese_file);
+    _test_selenese( $case, $test_selenese_file );
 
     # Test against the saved yaml
-    _test_yaml( $case, $yaml_data_file );
+    #_test_yaml( $case, $yaml_data_file );
 
     # Test against the saved perl
     my $perl_data_file = "$dir/$file.pl";
-    _test_perl( $case, $perl_data_file );
+    #_test_perl( $case, $perl_data_file );
 
 }
 
@@ -103,14 +98,14 @@ sub _test_selenese {
     my $content = join( '', <$io> );
     close $io;
     unified_diff;
-    eq_or_diff $content, $case->as_html, 
+    eq_or_diff $content, $case->as_html,
       $case->filename . ' - selenese output precisely';
 
-    for my $command ( @{ $case->commands } ) {
-        is scalar @{ $command->values } => 3, "Three values in command";
-    }
-    my $case2 = Parse::Selenese::TestCase->new();
-    $case2->parse_content($content);
+      #for my $command ( @{ $case->commands } ) {
+      #    is scalar @{ $command->values } => 3, "Three values in command";
+      #}
+      my $case2 = Parse::Selenese::TestCase->new();
+      $case2->parse_content($content);
 }
 
 sub _test_perl {

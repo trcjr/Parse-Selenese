@@ -17,13 +17,29 @@ use Cwd;
 use Algorithm::Diff;
 
 use_ok("Parse::Selenese");
-use_ok("Parse::Selenese::TestCase");
+
+#use_ok("Parse::Selenese::TestCase");
 
 my $case;
+
+my $case_data_dir = "$FindBin::Bin/test_case_data";
+my @selenese_data_files;
+find sub { push @selenese_data_files, $File::Find::name if /_TestCase\.html$/ },
+  $case_data_dir;
 
 #
 # Empty TestCase
 #
+dies_ok { Parse::Selenese::parse_case(); }
+"dies trying to parse when given nothing to parse";
+
+$case = Parse::Selenese::parse_case( $selenese_data_files[0] );
+ok( ref($case) && eval { $case->isa('Parse::Selenese::TestCase') },
+    "object is a Parse::Selenese::TestCase" );
+warn $case;
+done_testing();
+
+__END__
 $case = Parse::Selenese::TestCase->new();
 
 ok !$case->filename, 'TestCase without filename has undefined filename';

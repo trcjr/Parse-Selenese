@@ -1,3 +1,5 @@
+package Parse::Selenese::TestCase;
+use Moose;
 use Carp ();
 use Encode;
 use File::Basename;
@@ -12,16 +14,16 @@ $Data::Dumper::Indent = 1;
 use HTML::Element;
 use Modern::Perl;
 
-package Parse::Selenese::TestCase;
-use Moose;
-
-with 'Parse::Selenese';
-
 my ($_test_mt, $_selenese_testcase_template, $_selenese_testcase_template2);
 
 has 'commands' =>
   ( isa => 'ArrayRef', is => 'rw', required => 0, default => sub { [] } );
 
+
+sub BUILD {
+    my $self = shift;
+    return $self;
+}
 
 around BUILDARGS => sub {
     my $orig  = shift;

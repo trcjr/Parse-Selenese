@@ -6,9 +6,7 @@ use Moose;
 use Parse::Selenese::TestCase;
 
 sub parse_case {
-    my $c = Parse::Selenese::TestCase->new(shift);
-    warn $c;
-    return $c;
+    Parse::Selenese::TestCase->new(shift);
 }
 
 

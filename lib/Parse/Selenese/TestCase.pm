@@ -14,23 +14,23 @@ $Data::Dumper::Indent = 1;
 use HTML::Element;
 use Modern::Perl;
 
-my ($_test_mt, $_selenese_testcase_template, $_selenese_testcase_template2);
+my ( $_test_mt, $_selenese_testcase_template, $_selenese_testcase_template2 );
 
 has 'commands' =>
   ( isa => 'ArrayRef', is => 'rw', required => 0, default => sub { [] } );
-
-
-sub BUILD {
-    my $self = shift;
-    return $self;
-}
+has 'content'  => ( isa => 'Str', is => 'rw', required => 0 );
+has 'filename' => ( isa => 'Str', is => 'rw', required => 0 );
+has 'path'     => ( isa => 'Str', is => 'rw', required => 0 );
+has 'base_url' => ( isa => 'Str', is => 'rw', required => 0 );
+has 'title'    => ( isa => 'Str', is => 'rw', required => 0 );
+has 'thead'    => ( isa => 'Str', is => 'rw', required => 0 );
 
 around BUILDARGS => sub {
     my $orig  = shift;
     my $class = shift;
 
     if ( @_ == 1 && !ref $_[0] ) {
-        return $class->$orig( filename => $_[0], ) if -e $_[0];
+        return $class->$orig( filename => $_[0], ) if defined $_[0] && -e $_[0];
         return $class->$orig( content => $_[0], );
     }
     elsif ( @_ == 1 && ref $_[0] ) {
@@ -41,19 +41,84 @@ around BUILDARGS => sub {
     }
 };
 
+sub BUILD {
+    my $self = shift;
+    $self->parse if defined $self->filename || defined $self->content;
+}
+
 sub short_name {
     my $self = shift;
     my $x    = File::Basename::basename( $self->filename );
     return ( File::Basename::fileparse( $x, qr/\.[^.]*/ ) )[0];
 }
 
-sub parse {
-    my $self    = shift;
-    #if (defined ( $self->filename )) {
-    #    die " Can't read " . $self->filename unless -r $self->filename;
-    #}
 
-    return unless my $tree = $self->_parse;
+sub _parse {
+    my $self = shift;
+
+    #if ( $self->filename ) {
+    #    $tree->parse_file( $self->filename );
+    #} elsif ( $self->content ) {
+    #    $tree->parse_content( $content );
+    #}
+    #$tree->parse;
+
+    # base_urlを<link>から見つける
+    #return $tree;
+}
+
+sub _parse_thead {
+    my $self = shift;
+    my $tree = shift;
+    if ( $tree->find('thead') ) {
+        if ( $tree->find('thead')->find( 'td', rowspan => 3 ) ) {
+            return $tree->find('thead')->find( 'td', rowspan => 3 )
+              ->content->[0];
+        }
+    }
+    return '';
+}
+
+sub _parse_title {
+    my $self = shift;
+    my $tree = shift;
+    return $tree->find('title') ? $tree->find('title')->content->[0] : '';
+    #return $tree->find('title')->content->[0] if $tree->find('title');
+}
+
+
+sub parse {
+    my $self = shift;
+
+    # Only parse things once
+    return if scalar @{$self->commands};
+
+    my $tree = HTML::TreeBuilder->new;
+    $tree->store_comments(1);
+
+    # Dear God this shouldn't be written like this. There _MUST_ be a better
+    # way...
+    # HOW DO I WROTE PERL?
+    if ( defined ($self->filename) || defined ($self->content) ){
+        unless (defined $self->filename && -r $self->filename) {
+            die "file isn't readable";
+        }
+    } else {
+        die "file isn't defined";
+    }
+    foreach my $link ( $tree->find('link') ) {
+        if ( $link->attr('rel') eq 'selenium.base' ) {
+            $self->base_url( $link->attr('href') );
+        }
+    }
+    #return unless my $tree = $self->_parse;
+
+    # title
+    $self->title($self->_parse_title($tree));
+
+    # table head
+    $self->thead($self->_parse_thead($tree));
+
     #use Data::Dumper;
     #warn Dumper $tree;
 
@@ -63,7 +128,7 @@ sub parse {
     foreach my $trs_comments ( $tbody->find( ( 'tr', '~comment' ) ) ) {
         my @values;
         if ( $trs_comments->tag() eq '~comment' ) {
-            @values = ('comment', $trs_comments->attr('text'), '');
+            @values = ( 'comment', $trs_comments->attr('text'), '' );
         }
         elsif ( $trs_comments->tag() eq 'tr' ) {
 
@@ -117,20 +182,20 @@ sub as_perl {
 
 sub as_html {
     my $self = shift;
-    my $tt = Template->new();
+    my $tt   = Template->new();
 
     my $output = '';
-    my $vars = {
+    my $vars   = {
         commands => $self->commands,
         base_url => $self->base_url,
-        thead => $self->thead,
-        title => $self->title,
+        thead    => $self->thead,
+        title    => $self->title,
     };
-    $tt->process(\$_selenese_testcase_template2, $vars, \$output);
+    $tt->process( \$_selenese_testcase_template2, $vars, \$output );
     return $output;
 }
 
-$_test_mt =<<'END_TEST_MT';
+$_test_mt = <<'END_TEST_MT';
 ? my $base_url  = shift;
 ? my $perl_code = shift;
 #!/usr/bin/perl
@@ -150,13 +215,13 @@ my $sel = Test::WWW::Selenium->new( host => "localhost",
 <?= $perl_code ?>
 END_TEST_MT
 
-$_selenese_testcase_template=<<'END_SELENESE_TESTCASE_TEMPLATE';
+$_selenese_testcase_template = <<'END_SELENESE_TESTCASE_TEMPLATE';
 [% FOREACH command = commands -%]
 [% command.as_html %]
 [% END %]
 END_SELENESE_TESTCASE_TEMPLATE
 
-$_selenese_testcase_template2=<<'END_SELENESE_TESTCASE_TEMPLATE';
+$_selenese_testcase_template2 = <<'END_SELENESE_TESTCASE_TEMPLATE';
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">

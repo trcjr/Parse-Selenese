@@ -36,34 +36,21 @@ dies_ok { Parse::Selenese::parse_case(); }
 $case = Parse::Selenese::parse_case( $selenese_data_files[0] );
 ok( ref($case) && eval { $case->isa('Parse::Selenese::TestCase') },
     "object is a Parse::Selenese::TestCase" );
-warn $case;
-done_testing();
 
-__END__
 $case = Parse::Selenese::TestCase->new();
-
 ok !$case->filename, 'TestCase without filename has undefined filename';
 ok !@{ $case->commands }, 'TestCase without commans commands 0 commands';
 ok !$case->base_url, "Unparsed TestCase has no base_url";
 ok !$case->content,  "Unparsed TestCase has no content";
+
 dies_ok { Parse::Selenese::TestCase->new("some_file"); }
 "dies parsing a non existent file";
 dies_ok { my $c = Parse::Selenese::TestCase->new(); $c->parse(); }
 "dies trying to parse when given nothing to parse";
 
-#s_ok { my $c = Parse::Selenese::TestCase->new(); $c->parse(); } "dies trying to parse when given nothing to parse";
-
 ##
 ## TestCase from file
 ##
-
-my $case_data_dir = "$FindBin::Bin/test_case_data";
-my @selenese_data_files;
-find sub { push @selenese_data_files, $File::Find::name if /_TestCase\.html$/ },
-  $case_data_dir;
-
-$case = Parse::Selenese::TestCase->new();
-
 my $not_existing_file = "t/this_file_does_not_exist";
 dies_ok {
     $case->filename($not_existing_file);
@@ -121,7 +108,7 @@ sub _test_selenese {
       #    is scalar @{ $command->values } => 3, "Three values in command";
       #}
       my $case2 = Parse::Selenese::TestCase->new();
-      $case2->parse_content($content);
+      $case2->parse($content);
 }
 
 sub _test_perl {

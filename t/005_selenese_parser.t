@@ -28,5 +28,4 @@ find sub {
 lives_ok { $case = Parse::Selenese::parse( $selenese_testcase_data_files[0] ); }
 "detect a case";
 
-warn $case;
 done_testing();

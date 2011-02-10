@@ -9,6 +9,7 @@ use Parse::Selenese::Command;
 use Parse::Selenese::TestCase;
 use Text::MicroTemplate;
 use Template;
+use File::Temp;
 
 use Data::Dumper;
 $Data::Dumper::Indent = 1;
@@ -110,7 +111,7 @@ sub parse {
         $tree->parse_file( $self->filename );
     }
     elsif ( $self->content ) {
-        my $x = $tree->parse_content( $self->content );
+        my $x = $tree->parse_content(Encode::decode_utf8 $self->content );
         if ( !$x->find('title') ) {
             die
 "OH GOD THAT THE CONTENT YOU GAVE ME ISN'T EVEN CLOSE TO A TEST CASE!!!";
@@ -196,8 +197,7 @@ sub as_perl {
     return $renderer->(@args)->as_string;
 }
 
-sub as_html {
-    my $self = shift;
+sub as_html { my $self = shift;
     my $tt   = Template->new();
 
     my $output = '';
@@ -208,7 +208,7 @@ sub as_html {
         title    => $self->title,
     };
     $tt->process( \$_selenese_testcase_template2, $vars, \$output );
-    return $output;
+    return Encode::decode_utf8 $output;
 }
 
 $_test_mt = <<'END_TEST_MT';

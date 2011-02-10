@@ -240,6 +240,8 @@ sub as_html {
         values => $self->values,
     };
     $tt->process(\$template, $vars, \$output);
+    #return Encode::encode_utf8 $output;
+    return Encode::decode_utf8 $output;
     return $output;
 }
 

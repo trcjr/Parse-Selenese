@@ -1,26 +1,21 @@
-use Modern::Perl;
-
+use Algorithm::Diff;
+use Cwd;
+use Data::Dumper;
 use File::Basename;
-use YAML qw'freeze thaw LoadFile';
-
-#use Test::More tests => 3;
 use File::Find qw(find);
 use File::Spec;
-use Test::Most;
-use Test::Exception;
-use Data::Dumper;
 use FindBin;
-use Cwd;
+use Modern::Perl;
+use Test::Exception;
+use Test::Most;
+use Test::Differences;
+use YAML qw'freeze thaw LoadFile';
 
-#use Test::Base;
-#use String::Diff;
-use Algorithm::Diff;
+my $case;
 
 use_ok("Parse::Selenese");
 
 #use_ok("Parse::Selenese::TestCase");
-
-my $case;
 
 my $case_data_dir = "$FindBin::Bin/test_case_data";
 my @selenese_data_files;
@@ -30,23 +25,23 @@ find sub { push @selenese_data_files, $File::Find::name if /_TestCase\.html$/ },
 #
 # Empty TestCase
 #
-dies_ok { Parse::Selenese::parse_case(); }
+dies_ok { Parse::Selenese::parse(); }
 "dies trying to parse when given nothing to parse";
 
-$case = Parse::Selenese::parse_case( $selenese_data_files[0] );
+$case = Parse::Selenese::parse( $selenese_data_files[0] );
 ok( ref($case) && eval { $case->isa('Parse::Selenese::TestCase') },
     "object is a Parse::Selenese::TestCase" );
 
 $case = Parse::Selenese::TestCase->new();
 ok !$case->filename, 'TestCase without filename has undefined filename';
 ok !@{ $case->commands }, 'TestCase without commans commands 0 commands';
-ok !$case->base_url, "Unparsed TestCase has no base_url";
-ok !$case->content,  "Unparsed TestCase has no content";
+ok !$case->base_url, 'Unparsed TestCase has no base_url';
+ok !$case->content,  'Unparsed TestCase has no content';
 
-dies_ok { Parse::Selenese::TestCase->new("some_file"); }
-"dies parsing a non existent file";
+dies_ok { Parse::Selenese::TestCase->new('some_file'); }
+'dies parsing a non existent file';
 dies_ok { my $c = Parse::Selenese::TestCase->new(); $c->parse(); }
-"dies trying to parse when given nothing to parse";
+'dies trying to parse when given nothing to parse';
 
 ##
 ## TestCase from file
@@ -64,7 +59,6 @@ lives_ok {
 }
 $selenese_data_files[0] . " - Lives parsing a file";
 
-#done_testing();
 foreach my $test_selenese_file (@selenese_data_files) {
     $test_selenese_file = File::Spec->abs2rel($test_selenese_file);
     my ( $file, $dir, $ext ) =
@@ -72,13 +66,7 @@ foreach my $test_selenese_file (@selenese_data_files) {
     my $yaml_data_file = "$dir/$file.yaml";
 
     # Parse the html file
-    $case = Parse::Selenese::TestCase->new($test_selenese_file);
-    $case->parse;
-
-#is( $case->as_html, $content, $case->filename . ' - selenese output precisely' );
-
-    #$case2->parse_content($content);
-    $case->parse();
+    $case = Parse::Selenese::parse($test_selenese_file);
 
     # Test against the original parsed file
     _test_selenese( $case, $test_selenese_file );
@@ -87,7 +75,7 @@ foreach my $test_selenese_file (@selenese_data_files) {
     #_test_yaml( $case, $yaml_data_file );
 
     # Test against the saved perl
-    my $perl_data_file = "$dir/$file.pl";
+    #    my $perl_data_file = "$dir/$file.pl";
     #_test_perl( $case, $perl_data_file );
 
 }
@@ -104,11 +92,9 @@ sub _test_selenese {
     eq_or_diff $content, $case->as_html,
       $case->filename . ' - selenese output precisely';
 
-      #for my $command ( @{ $case->commands } ) {
-      #    is scalar @{ $command->values } => 3, "Three values in command";
-      #}
-      my $case2 = Parse::Selenese::TestCase->new();
-      $case2->parse($content);
+    my $case2 = Parse::Selenese::parse($content);
+    eq_or_diff $case->as_html, $case2->as_html,
+      $case->filename . ' - as_html reparsed still is the same';
 }
 
 sub _test_perl {

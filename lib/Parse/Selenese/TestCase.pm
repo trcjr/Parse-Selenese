@@ -1,6 +1,7 @@
 package Parse::Selenese::TestCase;
 use Moose;
 use Carp ();
+use Cwd;
 use Encode;
 use File::Basename;
 use HTML::TreeBuilder;
@@ -13,6 +14,9 @@ use Data::Dumper;
 $Data::Dumper::Indent = 1;
 use HTML::Element;
 use Modern::Perl;
+
+#use overload ('""' => 'as_html');
+
 
 my ( $_test_mt, $_selenese_testcase_template, $_selenese_testcase_template2 );
 
@@ -30,7 +34,10 @@ around BUILDARGS => sub {
     my $class = shift;
 
     if ( @_ == 1 && !ref $_[0] ) {
-        return $class->$orig( filename => $_[0], ) if defined $_[0] && -e $_[0];
+        return $class->$orig( filename => $_[0], )
+          if defined $_[0]
+              && defined Cwd::abs_path( $_[0] )
+              && -e Cwd::abs_path( $_[0] );
         return $class->$orig( content => $_[0], );
     }
     elsif ( @_ == 1 && ref $_[0] ) {
@@ -52,21 +59,6 @@ sub short_name {
     return ( File::Basename::fileparse( $x, qr/\.[^.]*/ ) )[0];
 }
 
-
-sub _parse {
-    my $self = shift;
-
-    #if ( $self->filename ) {
-    #    $tree->parse_file( $self->filename );
-    #} elsif ( $self->content ) {
-    #    $tree->parse_content( $content );
-    #}
-    #$tree->parse;
-
-    # base_urlを<link>から見つける
-    #return $tree;
-}
-
 sub _parse_thead {
     my $self = shift;
     my $tree = shift;
@@ -82,16 +74,20 @@ sub _parse_thead {
 sub _parse_title {
     my $self = shift;
     my $tree = shift;
-    return $tree->find('title') ? $tree->find('title')->content->[0] : '';
-    #return $tree->find('title')->content->[0] if $tree->find('title');
+    return
+      defined $tree->find('title') ? $tree->find('title')->content->[0] : '';
 }
-
 
 sub parse {
     my $self = shift;
 
+    use Data::Dumper;
+
+    #warn Dumper $_;
     # Only parse things once
-    return if scalar @{$self->commands};
+    Carp::cluck "so like I have commands" if scalar @{ $self->commands };
+    warn "so like I have commands" if scalar @{ $self->commands };
+    return if scalar @{ $self->commands };
 
     my $tree = HTML::TreeBuilder->new;
     $tree->store_comments(1);
@@ -99,25 +95,45 @@ sub parse {
     # Dear God this shouldn't be written like this. There _MUST_ be a better
     # way...
     # HOW DO I WROTE PERL?
-    if ( defined ($self->filename) || defined ($self->content) ){
-        unless (defined $self->filename && -r $self->filename) {
-            die "file isn't readable";
+    #    if ( defined( $self->filename ) || !defined( $self->content ) ) {
+    #        unless ( defined ($self->filename) && (-r $self->filename) ) {
+    #            die "file isn't readable";
+    #        }
+    #    }
+    #    else {
+    #        die "file isn't defined";
+    #    }
+    if ( defined( $self->filename ) ) {
+        if ( !-r $self->filename ) {
+            die "Um, I can't read the file you gave me to parse!";
         }
-    } else {
-        die "file isn't defined";
+        $tree->parse_file( $self->filename );
     }
+    elsif ( $self->content ) {
+        my $x = $tree->parse_content( $self->content );
+        if ( !$x->find('title') ) {
+            die
+"OH GOD THAT THE CONTENT YOU GAVE ME ISN'T EVEN CLOSE TO A TEST CASE!!!";
+        }
+    }
+    elsif ( !defined( $self->content ) || !defined( $self->filename ) ) {
+        die "GIVE ME SOMETHING TO PARSE!";
+    }
+    else {
+        warn "OH MY GOSH!";
+    }
+
     foreach my $link ( $tree->find('link') ) {
         if ( $link->attr('rel') eq 'selenium.base' ) {
             $self->base_url( $link->attr('href') );
         }
     }
-    #return unless my $tree = $self->_parse;
 
     # title
-    $self->title($self->_parse_title($tree));
+    $self->title( $self->_parse_title($tree) );
 
     # table head
-    $self->thead($self->_parse_thead($tree));
+    $self->thead( $self->_parse_thead($tree) );
 
     #use Data::Dumper;
     #warn Dumper $tree;

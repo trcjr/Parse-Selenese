@@ -5,10 +5,9 @@ use Modern::Perl;
 use Moose;
 use Parse::Selenese::TestCase;
 
-sub parse_case {
+sub parse {
     Parse::Selenese::TestCase->new(shift);
 }
-
 
 1;
 
@@ -25,6 +24,18 @@ Parse::Selenese -
 =head1 DESCRIPTION
 
 WWW::Selenium::Selenese is
+
+=head2 Functions
+
+=over
+
+=item C<Parse::Selenese::parse($filename|$content|%args)>
+
+Return a Parse::Selenese::TestCase, Parse::Selenese::TestSuite or undef if
+unable to parse the filename or content.
+
+=back
+
 
 =head1 AUTHOR
 

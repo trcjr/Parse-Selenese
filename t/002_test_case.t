@@ -44,6 +44,12 @@ dies_ok { Parse::Selenese::TestCase->new('some_file'); }
 dies_ok { my $c = Parse::Selenese::TestCase->new(); $c->parse(); }
 'dies trying to parse when given nothing to parse';
 
+lives_ok {
+my $c =
+  Parse::Selenese::TestCase->new(  filename => $selenese_data_files[0]  );
+}
+$selenese_data_files[0] . " - Lives new with filename arg";
+
 ##
 ## TestCase from file
 ##
@@ -76,7 +82,7 @@ foreach my $test_selenese_file (@selenese_data_files) {
     #_test_yaml( $case, $yaml_data_file );
 
     # Test against the saved perl
-    #    my $perl_data_file = "$dir/$file.pl";
+    my $perl_data_file = "$dir/$file.pl";
     #_test_perl( $case, $perl_data_file );
 
 }

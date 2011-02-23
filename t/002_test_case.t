@@ -85,22 +85,15 @@ sub _test_selenese {
     my $case               = shift;
     my $test_selenese_file = shift;
 
-    # Read the saved perl code
-    #open my $in,  "<:encoding(shiftjis)", $infile  or die;
     open my $io, '<:encoding(utf8)', $test_selenese_file;
     my $content = join( '', <$io> );
     close $io;
     my $case2 = Parse::Selenese::parse($content);
-    #warn "a " . $case->commands->[-1]->as_html;
-    #warn "b " . $case2->commands->[-1]->as_html;
-    #eq_or_diff $case->commands->[-1]->as_html, $case2->commands->[-1]->as_html, "stuff matches";
-
-
 
     eq_or_diff $content, $case->as_html,
       $case->filename . ' - selenese output precisely';
-#    eq_or_diff $case->as_html, $case2->as_html,
-#      $case->filename . ' - as_html reparsed still is the same';
+    eq_or_diff $case->as_html, $case2->as_html,
+      $case->filename . ' - as_html reparsed still is the same';
 }
 
 sub _test_perl {

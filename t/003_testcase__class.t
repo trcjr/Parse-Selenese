@@ -117,7 +117,7 @@ sub test_each_stored_selenese_file : Tests {
         _test_selenese( $case, $test_selenese_file );
 
         # Test against the saved yaml
-        #_test_yaml( $case, $yaml_data_file );
+        _test_yaml( $case, $yaml_data_file );
 
         # Test against the saved perl
         my $perl_data_file = "$dir/$file.pl";

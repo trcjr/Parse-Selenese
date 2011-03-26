@@ -30,7 +30,7 @@ dies_ok { Parse::Selenese::parse(); }
 "dies trying to parse when given nothing to parse";
 
 $case = Parse::Selenese::parse( $selenese_data_files[0] );
-ok( ref($case) && eval { $case->isa('Parse::Selenese::TestCase') },
+ok( $case->isa('Parse::Selenese::TestCase') ,
     "object is a Parse::Selenese::TestCase" );
 
 $case = Parse::Selenese::TestCase->new();
@@ -114,18 +114,20 @@ sub _test_perl {
     }
 
   SKIP: {
-        eval {
+      #eval {
 
             #my $perl_data = LoadFile($perl_data_file);
             # Read the saved perl code
-            open my $io, '<', $perl_data_file
-              or die "Can't open perl data file";
-            my $expected = join( '', <$io> );
-            close $io;
-        };
-        if ($@) {
-            skip "perl_data_file not found", $test_count;
-        }
+            #open my $io, '<', $perl_data_file
+            #open my $io, '<', $perl_data_file;
+            #my $expected = join( '', <$io> );
+            #close $io;
+            #};
+            #if ($@) {
+            #skip "perl_data_file not found", $test_count;
+            #}
+        skip "perl_data_file not found", $test_count
+        unless (-e $perl_data_file);
         open my $io, '<', $perl_data_file;
         my $expected = join( '', <$io> );
         close $io;

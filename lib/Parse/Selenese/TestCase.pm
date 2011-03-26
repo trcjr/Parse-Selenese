@@ -63,13 +63,14 @@ sub short_name {
 sub _parse_thead {
     my $self = shift;
     my $tree = shift;
+    my $content = '';
     if ( $tree->find('thead') ) {
         if ( $tree->find('thead')->find( 'td', rowspan => 3 ) ) {
-            return $tree->find('thead')->find( 'td', rowspan => 3 )
+            $content = $tree->find('thead')->find( 'td', rowspan => 3 )
               ->content->[0];
         }
     }
-    return '';
+    return $content;
 }
 
 sub _parse_title {
@@ -86,8 +87,8 @@ sub parse {
 
     #warn Dumper $_;
     # Only parse things once
-    Carp::cluck "so like I have commands" if scalar @{ $self->commands };
-    warn "so like I have commands" if scalar @{ $self->commands };
+    #Carp::cluck "so like I have commands" if scalar @{ $self->commands };
+    #warn "so like I have commands" if scalar @{ $self->commands };
     return if scalar @{ $self->commands };
 
     my $tree = HTML::TreeBuilder->new;

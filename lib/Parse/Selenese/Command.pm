@@ -16,14 +16,14 @@ has 'element' => (
     builder => '_element',
 );
 
-my $_selenese_command_template=<<'END_SELENESE_COMMAND_TEMPLATE';
+my $_selenese_command_template = <<'END_SELENESE_COMMAND_TEMPLATE';
 <tr>
 [% FOREACH value = values -%]
 	<td>[% value %]</td>
 [% END %]</tr>
 END_SELENESE_COMMAND_TEMPLATE
 
-my $_selenese_comment_template="<!--[% values.1 %]-->\n";
+my $_selenese_comment_template = "<!--[% values.1 %]-->\n";
 
 my %command_map = (
 
@@ -170,11 +170,6 @@ my %command_map = (
     },
 );
 
-# translate values to Perl code
-#sub values_to_perl {
-#    __PACKAGE__->new(shift)->as_perl;
-#}
-
 around BUILDARGS => sub {
     my $orig  = shift;
     my $class = shift;
@@ -222,27 +217,25 @@ sub _element {
     return $element;
 }
 
-sub _get_template {
+sub _get_selenese_template_for_tag {
     my $self = shift;
+    my $tag = shift // $self->element->tag;
 
-    if ($self->element->tag eq "~comment") {
-        return $_selenese_comment_template;
-    }
-    return $_selenese_command_template;
+    #my $tag = $self->element->tag;
+    my $template = $_selenese_command_template;
+    $template = $_selenese_comment_template
+      if ( $tag eq "~comment" );
+    return $template;
 }
 
 sub as_html {
-    my $self = shift;
-    my $tt = Template->new;
-    my $template = $self->_get_template;
-    my $output = '';
-    my $vars = {
-        values => $self->values,
-    };
-    $tt->process(\$template, $vars, \$output);
-    #return Encode::encode_utf8 $output;
+    my $self     = shift;
+    my $tt       = Template->new;
+    my $template = $self->_get_selenese_template_for_tag( $self->element->tag );
+    my $output   = '';
+    my $vars     = { values => $self->values, };
+    $tt->process( \$template, $vars, \$output );
     return Encode::decode_utf8 $output;
-    return $output;
 }
 
 sub turn_func_into_perl {
@@ -308,11 +301,8 @@ sub make_args {
         $str .= join( ', ', map { quote($_) } @{ $code->{force_args} } );
     }
     else {
-        if ( defined $code->{args} ) {
-            @args =
-              map { defined $args[$_] ? $args[$_] : '' }
-              ( 0 .. $code->{args} - 1 );
-        }
+        @args =
+          map { $args[$_] // '' } ( 0 .. $code->{args} - 1 );
         map { s/^exact:// } @args;
 
         if ( defined $code->{func} && $code->{func} eq '#' ? 0 : 1 ) {
@@ -339,3 +329,42 @@ sub quote {
 }
 
 1;
+__END__
+
+=head1 NAME
+
+Parse::Selenese -
+
+=head1 SYNOPSIS
+
+  use Parse::Selenese;
+
+=head1 DESCRIPTION
+
+WWW::Selenium::Selenese is
+
+=head2 Functions
+
+=over
+
+=item C<Parse::Selenese::Command::_get_template()
+Return the 
+
+Return a Parse::Selenese::TestCase, Parse::Selenese::TestSuite or undef if
+unable to parse the filename or content.
+
+=back
+
+
+=head1 AUTHOR
+
+Theodore Robert Campbell Jr.  E<lt>trcjr@cpan.orgE<gt>
+
+=head1 SEE ALSO
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

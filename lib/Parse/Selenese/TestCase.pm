@@ -198,7 +198,23 @@ sub as_perl {
     return $renderer->(@args)->as_string;
 }
 
-sub as_html { my $self = shift;
+
+sub save {
+    my $self = shift;
+    my $file = shift;
+
+    my $filename = $self->filename;
+    $filename = $file if $file;
+
+    open my $fh, '>', $filename
+        or die "Can't write to '$filename': $!\n";
+    print $fh $self->as_html;
+    close $fh;
+
+}
+
+sub as_html {
+    my $self = shift;
     my $tt   = Template->new();
 
     my $output = '';

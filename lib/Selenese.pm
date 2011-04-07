@@ -1,13 +1,9 @@
 # ABSTRACT: Parser for Selenese
-package Parse::Selenese;
+package Selenese;
 use strict;
 use Modern::Perl;
 use Moose;
-use Parse::Selenese::TestCase;
-
-sub parse {
-    Parse::Selenese::TestCase->new(shift);
-}
+use Selenese::TestCase;
 
 1;
 

@@ -1,11 +1,12 @@
+package Selenese::Command;
+use Moose;
+
 use strict;
-use Parse::Selenese::TestCase;
+use Selenese::TestCase;
 use Carp ();
 use HTML::TreeBuilder;
 use Template;
 
-package Parse::Selenese::Command;
-use Moose;
 
 has 'values' =>
   ( isa => 'ArrayRef', is => 'rw', required => 0, default => sub { [] } );

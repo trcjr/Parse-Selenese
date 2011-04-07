@@ -1,12 +1,11 @@
-package Parse::Selenese::TestCase;
+package Selenese::TestCase;
 use Moose;
 use Carp ();
 use Cwd;
 use Encode;
 use File::Basename;
 use HTML::TreeBuilder;
-use Parse::Selenese::Command;
-use Parse::Selenese::TestCase;
+use Selenese::Command;
 use Text::MicroTemplate;
 use Template;
 use File::Temp;

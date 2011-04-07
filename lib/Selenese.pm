@@ -1,11 +1,4 @@
 # ABSTRACT: Parser for Selenese
-package Selenese;
-use strict;
-use Modern::Perl;
-use Moose;
-use Selenese::TestCase;
-
-1;
 
 __END__
 

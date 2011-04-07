@@ -1,11 +1,12 @@
-package Parse::Selenese::Test::Suite;
+# ABSTRACT: A Selenium Test Suite
+package Selenese::Test::Suite;
 use Moose;
 
 use strict;
 use Carp ();
 use File::Basename;
 use HTML::TreeBuilder;
-use Parse::Selenese::Test::Case;
+use Selenese::Test::Case;
 
 
 has ' cases ' =>
@@ -85,7 +86,7 @@ sub parse {
             if ($link) {
                 my $case;
                 eval {
-                    $case = Parse::Selenese::TestCase->new(
+                    $case = Selenese::Test::Case->new(
                         $base_dir . '/' . $link->attr('href')
                     );
                 };

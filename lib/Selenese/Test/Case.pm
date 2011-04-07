@@ -1,3 +1,4 @@
+# ABSTRACT: A Selenium Test Case
 package Selenese::Test::Case;
 use Moose;
 use Carp ();

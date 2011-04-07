@@ -105,3 +105,67 @@ sub parse {
 }
 
 1;
+__END__
+
+=head1 NAME
+
+Selenese::Test::Suite
+
+=head1 SYNOPSIS
+
+    use Selenese::Test::Case;
+    my $tc = Selenese::Test::Case->new;
+    $tc->from_file($filename);
+    $tc = Selenese::Test::Case->new->from_file($filename);
+    $tc = Selenese::Test::Case->new->from_string($string);
+    $tc = Selenese::Test::Case->new->from_commands(\@commands);
+
+
+
+=head1 DESCRIPTION
+
+Selenium::Test::Case can be used to turn a test case in Selenese HTML format 
+into an object that usable by perl.
+
+=head2 METHODS
+
+=head3 C< parse >
+
+Parse the filename or string into C< Selenium::Commands > for use by the
+object.
+
+
+
+=head3 C< short_name >
+
+The short name of the test case
+
+    print $tc->short_name;
+    # load_some_page
+
+=head3 C< as_html >
+
+Return a scalar representing the command in HTML.
+
+
+=head3 C< as_perl >
+
+Return a scalar representing the command in perl.
+
+
+=head3 C< save( [$filename]) >
+
+Save the test case to optional filename.
+
+=head1 AUTHOR
+
+Theodore Robert Campbell Jr E<lt>trcjr@cpan.orgE<gt>
+
+=head1 SEE ALSO
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

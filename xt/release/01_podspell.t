@@ -3,9 +3,7 @@ eval q{ use Test::Spelling };
 plan skip_all => "Test::Spelling is not installed." if $@;
 add_stopwords(map { split /[\s\:\-]/ } <DATA>);
 $ENV{LANG} = 'C';
-set_spell_cmd('aspell list');
-all_pod_files_spelling_ok('lib');
+all_pod_files_spelling_ok();
 __DATA__
-Nao Iizuka
-iizuka@cpan.org
-WWW::Selenium::Selenese
+html
+Selenese

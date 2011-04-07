@@ -191,7 +191,7 @@ sub as_perl {
     my @args = @{ $self->{values} };
     shift @args;
     if ($code) {
-        $line = turn_func_into_perl( $code, @args );
+        $line = _turn_func_into_perl( $code, @args );
     }
     if ($line) {
         $line .= "\n";
@@ -239,19 +239,19 @@ sub as_html {
     return Encode::decode_utf8 $output;
 }
 
-sub turn_func_into_perl {
+sub _turn_func_into_perl {
     my ( $code, @args ) = @_;
 
     my $line = '';
     if ( ref( $code->{func} ) eq 'ARRAY' ) {
         foreach my $subcode ( @{ $code->{func} } ) {
             $line .= "\n" if $line;
-            $line .= turn_func_into_perl( $subcode, @args );
+            $line .= _turn_func_into_perl( $subcode, @args );
         }
     }
     else {
         if ( defined $code->{func} && $code->{func} eq '#' ) {
-            $line = $code->{func} . make_args( $code, @args );
+            $line = $code->{func} . _make_args( $code, @args );
         }
         elsif ( defined $code->{store} && $code->{store} ) {
             my $varname = pop @args;
@@ -260,15 +260,15 @@ sub turn_func_into_perl {
                 $line .=
                     "\$sel->"
                   . $code->{func} . '('
-                  . make_args( $code, @args ) . ');';
+                  . _make_args( $code, @args ) . ');';
             }
             else {
-                $line .= make_args( $code, @args ) . ";";
+                $line .= _make_args( $code, @args ) . ";";
             }
         }
         else {
             $line =
-              '$sel->' . $code->{func} . '(' . make_args( $code, @args ) . ');';
+              '$sel->' . $code->{func} . '(' . _make_args( $code, @args ) . ');';
         }
 
         #        if ( $code->{repeat} ) {
@@ -294,20 +294,23 @@ EOF
     return $line;
 }
 
-sub make_args {
+sub _make_args {
     my ( $code, @args ) = @_;
 
     my $str = '';
     if ( $code->{force_args} ) {
-        $str .= join( ', ', map { quote($_) } @{ $code->{force_args} } );
+        $str .= join( ', ', map { _quote($_) } @{ $code->{force_args} } );
     }
     else {
         @args =
           map { $args[$_] // '' } ( 0 .. $code->{args} - 1 );
-        map { s/^exact:// } @args;
+        for my $arg (@args) {
+            $arg =~ s/^exact://;
+        }
+        #map { s/^exact:// } @args;
 
         if ( defined $code->{func} && $code->{func} eq '#' ? 0 : 1 ) {
-            $str .= join( ', ', map { quote($_) } @args );
+            $str .= join( ', ', map { _quote($_) } @args );
         }
         else {
             $str .= join( ', ', @args );
@@ -317,7 +320,7 @@ sub make_args {
     return $str;
 }
 
-sub quote {
+sub _quote {
     my $str        = shift;
     my $quote_char = shift;
 
@@ -334,32 +337,56 @@ __END__
 
 =head1 NAME
 
-Parse::Selenese -
+Selenese::Command
 
 =head1 SYNOPSIS
 
-  use Parse::Selenese;
+    use Selenese::Command;
+    my $tc = Selenese::Command->new;
+
 
 =head1 DESCRIPTION
 
-WWW::Selenium::Selenese is
+Selenese::Command is used to represent a parsed command or comment from a C<Selenese::Test::Case>
 
-=head2 Functions
+=head2 METHODS
 
-=over
+=head3 C< parse >
 
-=item C<Parse::Selenese::Command::_get_template()
-Return the 
+Parse the filename or string into C< Selenium::Command > for use by the
+object.
 
-Return a Parse::Selenese::TestCase, Parse::Selenese::TestSuite or undef if
-unable to parse the filename or content.
 
-=back
 
+=head3 C< short_name >
+
+The short name of the test case
+
+    print $tc->short_name;
+    # load_some_page
+
+=head3 C< as_html >
+
+Return a scalar representing the command in HTML.
+    <tr>
+    	<td>open</td>
+    	<td>/</td>
+    	<td></td>
+    </tr>
+
+
+=head3 C< as_perl >
+
+Return a scalar representing the command in perl.
+
+
+=head3 C< save( [$filename]) >
+
+Save the test case to optional filename.
 
 =head1 AUTHOR
 
-Theodore Robert Campbell Jr.  E<lt>trcjr@cpan.orgE<gt>
+Theodore Robert Campbell Jr E<lt>trcjr@cpan.orgE<gt>
 
 =head1 SEE ALSO
 

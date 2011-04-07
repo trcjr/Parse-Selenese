@@ -19,10 +19,9 @@ INIT { Test::Class->runtests }
 sub startup : Tests(startup) {
     my $self = shift;
     $self->selenese_data_files(
-
-        #$self->{_selenese_data_files} // sub {
         sub {
             my $case_data_dir = "$FindBin::Bin/test_case_data";
+            diag Dumper $case_data_dir;
             my @selenese_data_files;
             find sub {
                 push @selenese_data_files, $File::Find::name

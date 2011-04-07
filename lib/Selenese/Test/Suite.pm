@@ -1,12 +1,12 @@
+package Parse::Selenese::Test::Suite;
+use Moose;
+
 use strict;
 use Carp ();
 use File::Basename;
 use HTML::TreeBuilder;
-use Parse::Selenese::TestCase;
+use Parse::Selenese::Test::Case;
 
-package Parse::Selenese::TestSuite;
-use Moose;
-extends'Parse::Selenese::Base';
 
 has ' cases ' =>
   ( isa => ' ArrayRef ', is => ' rw ', required => 0, default => sub { [] } );

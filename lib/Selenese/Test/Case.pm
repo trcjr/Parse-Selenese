@@ -1,4 +1,4 @@
-package Selenese::TestCase;
+package Selenese::Test::Case;
 use Moose;
 use Carp ();
 use Cwd;
@@ -172,7 +172,7 @@ sub parse {
             } $trs_comments->find('td');
         }
 
-        my $command = Parse::Selenese::Command->new( \@values );
+        my $command = Selenese::Command->new( \@values );
         push( @commands, $command );
     }
     $self->commands( \@commands );

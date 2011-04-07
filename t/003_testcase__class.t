@@ -8,8 +8,7 @@ use FindBin;
 use Modern::Perl;
 use Test::Differences;
 use YAML qw'freeze thaw LoadFile';
-use Parse::Selenese;
-use Parse::Selenese::TestCase;
+use Selenese::Test::Case;
 
 unified_diff;
 use Test::Class::Most attributes => [qw/ empty_test_case selenese_data_files /];
@@ -37,7 +36,7 @@ sub startup : Tests(startup) {
 
 sub setup : Tests(setup) {
     my $self = shift;
-    $self->empty_test_case( Parse::Selenese::TestCase->new() );
+    $self->empty_test_case( Selenese::Test::Case->new() );
 
 }
 
@@ -49,7 +48,7 @@ sub shutdown : Tests(shutdown) {
 
 sub constructor : Tests {
     my $self = shift;
-    my $case = new_ok("Parse::Selenese::TestCase");
+    my $case = new_ok("Selenese::Test::Case");
 
     ok !$case->filename, 'TestCase without filename has undefined filename';
     ok !@{ $case->commands }, 'TestCase without commans commands 0 commands';
@@ -62,14 +61,14 @@ sub tests_that_should_die : Tests {
     my $self = shift;
     my $case = $self->empty_test_case();
 
-    dies_ok { Parse::Selenese::parse(); }
-    "dies trying to parse when given nothing to parse";
+    #dies_ok { Parse::Selenese::parse(); }
+    #"dies trying to parse when given nothing to parse";
 
-    dies_ok { Parse::Selenese::TestCase->new('some_file'); }
+    dies_ok { Selenese::Test::Case->new('some_file'); }
     'dies parsing a non existent file';
 
     dies_ok {
-        my $c = Parse::Selenese::TestCase->new();
+        my $c = Selenese::Test::Case->new();
         $c->parse();
     }
     'dies trying to parse when given nothing to parse';
@@ -88,7 +87,7 @@ sub tests_that_should_live : Tests {
 
     lives_ok {
         my $c =
-          Parse::Selenese::TestCase->new(
+          Selenese::Test::Case->new(
             filename => $self->selenese_data_files->[0] );
     }
     $self->selenese_data_files->[0] . " - Lives new with filename arg";
@@ -111,7 +110,8 @@ sub test_each_stored_selenese_file : Tests {
         my $yaml_data_file = "$dir/$file.yaml";
 
         # Parse the html file
-        $case = Parse::Selenese::parse($test_selenese_file);
+        $case = Selenese::Test::Case->new( filename => $test_selenese_file );
+        #$case = Parse::Selenese::parse($test_selenese_file);
 
         # Test against the original parsed file
         _test_selenese( $case, $test_selenese_file );
@@ -134,7 +134,7 @@ sub _test_selenese {
     open my $io, '<:encoding(utf8)', $test_selenese_file;
     my $content = join( '', <$io> );
     close $io;
-    my $case2 = Parse::Selenese::parse($content);
+    my $case2 = Selenese::Test::Case->new($content);
 
     eq_or_diff $content, $case->as_html,
       $case->filename . ' - selenese output precisely';

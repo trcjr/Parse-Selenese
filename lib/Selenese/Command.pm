@@ -2,7 +2,7 @@ package Selenese::Command;
 use Moose;
 
 use strict;
-use Selenese::TestCase;
+use Selenese::Test::Case;
 use Carp ();
 use HTML::TreeBuilder;
 use Template;

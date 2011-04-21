@@ -132,6 +132,8 @@ sub _test_selenese {
     my $case               = shift;
     my $test_selenese_file = shift;
 
+    # do not test the known malformed cases.
+    return if $test_selenese_file =~ /malformed/;
     open my $io, '<:encoding(utf8)', $test_selenese_file;
     my $content = join( '', <$io> );
     close $io;

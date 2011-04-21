@@ -1,4 +1,6 @@
 package Parse::Selenese::TestCase;
+use strict;
+use warnings;
 use Moose;
 use Carp ();
 use Cwd;

@@ -128,6 +128,37 @@ sub test_each_stored_selenese_file : Tests {
     }
 }
 
+sub test_save_file : Tests {
+    my $self = shift;
+    use File::Temp ();
+
+    my $c =
+      Parse::Selenese::TestCase->new(
+        filename => $self->selenese_data_files->[0] );
+
+    my $fh    = File::Temp->new();
+    my $fname = $fh->filename;
+    lives_ok {
+        $c->save($fname);
+    }
+    "could save file";
+    ok( -e $fname, "save file exists" );
+
+    my $new_case = Parse::Selenese::TestCase->new( filename => $fname );
+    is( $new_case->filename, $fname, "Parsed saved case has correct filename" );
+
+    # Change the filename of the new case to match that of our control
+    $new_case->filename( $c->filename );
+    is_deeply( $c, $new_case,
+        "Parsing saved case gives an equilivent to the original case" );
+    lives_ok {
+        $new_case->save($fname);
+    }
+    "could save new file";
+
+    #$self->selenese_data_files->[0] . " - Lives new with filename arg";
+}
+
 sub _test_selenese {
     my $case               = shift;
     my $test_selenese_file = shift;

@@ -1,7 +1,6 @@
 use Algorithm::Diff;
 use Cwd;
 use Data::Dumper;
-use Data::Dumper;
 use File::Basename;
 use File::Find qw(find);
 use FindBin;

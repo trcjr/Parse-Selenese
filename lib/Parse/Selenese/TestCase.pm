@@ -6,6 +6,7 @@ use Carp ();
 use open ':encoding(utf8)';
 use Cwd;
 use Encode;
+use Try::Tiny;
 use File::Basename;
 use HTML::TreeBuilder;
 use Parse::Selenese::Command;
@@ -77,8 +78,11 @@ sub _parse_thead {
 sub _parse_title {
     my $self = shift;
     my $tree = shift;
-    return
-      defined $tree->find('title') ? $tree->find('title')->content->[0] : '';
+    my $title = "";
+    try {
+        $title = $tree->find('title')->content->[0];
+    };
+    return $title;
 }
 
 sub parse {

@@ -14,10 +14,7 @@ use Parse::Selenese::TestCase;
 use Text::MicroTemplate;
 use Template;
 use File::Temp;
-
 use HTML::Element;
-
-#use overload ('""' => 'as_html');
 
 my ( $_test_mt, $_selenese_testcase_template, $_selenese_testcase_template2 );
 

@@ -30,6 +30,9 @@ sub startup : Tests(startup) {
     );
 }
 
+sub setup : Tests(setup) {
+}
+
 sub teardown : Tests(teardown) {
 }
 

@@ -151,7 +151,6 @@ sub parse {
                 my $value = '';
                 foreach my $child ( $_->content_list ) {
 
-                    # <br />が含まれる場合はタグごと抽出
                     if ( ref($child) && eval { $child->isa('HTML::Element') } )
                     {
                         $value .= $child->as_HTML('<>&');

@@ -64,10 +64,11 @@ sub _parse_thead {
     my $self = shift;
     my $tree = shift;
     my $content = '';
-    if ( $tree->find('thead') ) {
-        if ( $tree->find('thead')->find( 'td', rowspan => 3 ) ) {
-            $content = $tree->find('thead')->find( 'td', rowspan => 3 )
-              ->content->[0];
+    my $thead = $tree->find('thead');
+    if ( $thead ) {
+        my $td = $thead->find( 'td', rowspan => 3 );
+        if ( $td ) {
+            $content = $td->content->[0];
         }
     }
     return $content;

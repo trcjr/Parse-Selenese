@@ -1,3 +1,3 @@
-package Parse::Selenese::Test::Case::Test;
-use Test::Class::Most parent => 'Parse::Selenese::Test';
+package Parse::Selenese::TestSuite::Test;
+use Test::Class::Most parent => 'Parse::Selenese::Base';
 1;

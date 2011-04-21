@@ -1,5 +1,11 @@
-package Parse::Selenese::Test::Case::Test;
-use Test::Class::Most parent => 'Parse::Selenese::Test';
+package Parse::Selenese::TestCase::Test;
+use Test::Class::Most parent => 'Parse::Selenese::Base';
+use Parse::Selenese::TestCase;
+
+sub setup : Tests(setup) {
+    my $self = shift;
+    $self->empty_test_case( Parse::Selenese::TestCase->new() );
+}
 
 use Test::Differences;
 use YAML qw'freeze thaw LoadFile';

@@ -1,4 +1,7 @@
-package Parse::Selenese::Base;
+package Parse::Selenese::TestCase::Test;
+use Test::Class::Most parent => 'Parse::Selenese::Base';
+
+package Parse::Selenese::Test;
 use strict;
 use warnings;
 use Algorithm::Diff;
@@ -10,7 +13,10 @@ use FindBin;
 use Modern::Perl;
 use Test::Differences;
 use YAML qw'freeze thaw LoadFile';
+use Parse::Selenese;
+use Parse::Selenese::TestCase;
 
+unified_diff;
 
 use Test::Class::Most attributes => [qw/ empty_test_case selenese_data_files /];
 
@@ -28,6 +34,11 @@ sub startup : Tests(startup) {
           }
           ->()
     );
+}
+
+sub setup : Tests(setup) {
+    my $self = shift;
+    $self->empty_test_case( Parse::Selenese::TestCase->new() );
 }
 
 sub teardown : Tests(teardown) {

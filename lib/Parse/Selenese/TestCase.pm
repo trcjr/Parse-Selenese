@@ -19,7 +19,6 @@ use HTML::Element;
 
 #use overload ('""' => 'as_html');
 
-
 my ( $_test_mt, $_selenese_testcase_template, $_selenese_testcase_template2 );
 
 has 'commands' =>
@@ -62,13 +61,13 @@ sub short_name {
 }
 
 sub _parse_thead {
-    my $self = shift;
-    my $tree = shift;
+    my $self    = shift;
+    my $tree    = shift;
     my $content = '';
-    my $thead = $tree->find('thead');
-    if ( $thead ) {
+    my $thead   = $tree->find('thead');
+    if ($thead) {
         my $td = $thead->find( 'td', rowspan => 3 );
-        if ( $td ) {
+        if ($td) {
             $content = $td->content->[0];
         }
     }
@@ -76,8 +75,8 @@ sub _parse_thead {
 }
 
 sub _parse_title {
-    my $self = shift;
-    my $tree = shift;
+    my $self  = shift;
+    my $tree  = shift;
     my $title = "";
     try {
         $title = $tree->find('title')->content->[0];
@@ -87,7 +86,6 @@ sub _parse_title {
 
 sub parse {
     my $self = shift;
-
 
     # Only parse things once
     return if scalar @{ $self->commands };
@@ -113,7 +111,7 @@ sub parse {
         $tree->parse_file( $self->filename );
     }
     elsif ( $self->content ) {
-        my $x = $tree->parse_content(Encode::decode_utf8 $self->content );
+        my $x = $tree->parse_content( Encode::decode_utf8 $self->content );
         if ( !$x->find('title') ) {
             die
 "OH GOD THAT THE CONTENT YOU GAVE ME ISN'T EVEN CLOSE TO A TEST CASE!!!";
@@ -192,7 +190,6 @@ sub as_perl {
     return $renderer->(@args)->as_string;
 }
 
-
 sub save {
     my $self = shift;
     my $file = shift;
@@ -201,7 +198,7 @@ sub save {
     $filename = $file if $file;
 
     open my $fh, '>', $filename
-        or die "Can't write to '$filename': $!\n";
+      or die "Can't write to '$filename': $!\n";
     print $fh $self->as_html;
     close $fh;
 

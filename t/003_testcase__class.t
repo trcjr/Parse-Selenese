@@ -15,7 +15,6 @@ use Parse::Selenese::TestCase;
 unified_diff;
 use Test::Class::Most attributes => [qw/ empty_test_case selenese_data_files /];
 
-
 INIT { Test::Class->runtests }
 
 sub startup : Tests(startup) {
@@ -165,6 +164,7 @@ sub _test_selenese {
 
     # do not test the known malformed cases.
     return if $test_selenese_file =~ /malformed/;
+
     open my $io, '<:encoding(utf8)', $test_selenese_file;
     my $content = join( '', <$io> );
     close $io;

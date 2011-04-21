@@ -1,6 +1,9 @@
 package Parse::Selenese::TestCase::Test;
 use Test::Class::Most parent => 'Parse::Selenese::Base';
+use Parse::Selenese;
 use Parse::Selenese::TestCase;
+use FindBin;
+use File::Find qw(find);
 use Try::Tiny;
 
 sub setup : Tests(setup) {
@@ -8,8 +11,21 @@ sub setup : Tests(setup) {
     $self->empty_test_case( Parse::Selenese::TestCase->new() );
 }
 
-use Test::Differences;
-use YAML qw'freeze thaw LoadFile';
+sub startup : Tests(startup) {
+    my $self = shift;
+    $self->selenese_data_files(
+        sub {
+            my @selenese_data_files;
+            my $case_data_dir = "$FindBin::Bin/test_case_data";
+            find sub {
+                push @selenese_data_files, $File::Find::name
+                  if /_TestCase\.html$/;
+            }, $case_data_dir;
+            $self->{_selenese_data_files} = \@selenese_data_files;
+          }
+          ->()
+    );
+}
 
 sub constructor : Tests {
     my $self = shift;
@@ -125,6 +141,7 @@ sub test_save_file : Tests {
 sub test_new_from_content : Tests {
     my $case = shift;
     return;
+
     #open my $io, '<:encoding(utf8)', $test_selenese_file;
     #my $content = join( '', <$io> );
     #close $io;
@@ -143,7 +160,8 @@ sub _test_selenese {
     close $io;
     my $case2 = Parse::Selenese::TestCase->new( content => $content );
 
-    my $case3 = Parse::Selenese::TestCase->new( filename => $test_selenese_file );
+    my $case3 =
+      Parse::Selenese::TestCase->new( filename => $test_selenese_file );
     $case3->parse;
 
     eq_or_diff $content, $case->as_html,

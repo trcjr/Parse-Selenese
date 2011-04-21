@@ -1,6 +1,7 @@
 package Parse::Selenese::TestCase::Test;
 use Test::Class::Most parent => 'Parse::Selenese::Base';
 use Parse::Selenese::TestCase;
+use Try::Tiny;
 
 sub setup : Tests(setup) {
     my $self = shift;
@@ -151,31 +152,33 @@ sub _test_selenese {
       $case->filename . ' - as_html reparsed still is the same';
 }
 
-sub _test_perl {
-    my $case           = shift;
-    my $perl_data_file = shift;
-
+sub _num_tests_for_case {
+    my $case = shift;
     my $test_count = 0;
     for my $idx ( 0 .. @{ $case->commands } - 1 ) {
         my $command        = $case->commands->[$idx];
         my $command_values = $command->{values};
         $test_count++ for 0 .. @$command_values - 1;
     }
+    return $test_count;
+}
+
+sub _test_perl {
+    my $case           = shift;
+    my $perl_data_file = shift;
+
+    my $test_count = _num_tests_for_case($case);
 
   SKIP: {
-        eval {
+        my $expected;
+        try {
             open my $io, '<', $perl_data_file
               or die "Can't open perl data file";
-            my $expected = join( '', <$io> );
+            $expected = join( '', <$io> );
             close $io;
+        } catch {
+            skip "$perl_data_file not found", $test_count;
         };
-        if ($@) {
-            skip "perl_data_file not found", $test_count;
-        }
-        open my $io, '<', $perl_data_file;
-        my $expected = join( '', <$io> );
-        close $io;
-
         unified_diff;
         eq_or_diff $expected, $case->as_perl,
           $case->filename . ' - selenese output precisely';
@@ -190,19 +193,15 @@ sub _test_perl {
 sub _test_yaml {
     my $case           = shift;
     my $yaml_data_file = shift;
-    my $test_count     = 0;
-    for my $idx ( 0 .. @{ $case->commands } - 1 ) {
-        my $command        = $case->commands->[$idx];
-        my $command_values = $command->{values};
-        $test_count++ for 0 .. @$command_values - 1;
-    }
+    my $test_count = _num_tests_for_case($case);
 
   SKIP: {
-        eval { my $yaml_data = LoadFile($yaml_data_file); };
-        if ($@) {
+        my $yaml_data;
+        try {
+            $yaml_data = LoadFile($yaml_data_file);
+        } catch {
             skip "$yaml_data_file not found", $test_count;
-        }
-        my $yaml_data = LoadFile($yaml_data_file);
+        };
 
         # Load the yaml dump that matches
         is $case->short_name => $yaml_data->{short_name},

@@ -1,3 +1,5 @@
+use strict;
+use warnings;
 use Algorithm::Diff;
 use Cwd;
 use Data::Dumper;

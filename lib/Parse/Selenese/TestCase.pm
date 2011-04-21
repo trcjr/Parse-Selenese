@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Moose;
 use Carp ();
+use open ':encoding(utf8)';
 use Cwd;
 use Encode;
 use File::Basename;

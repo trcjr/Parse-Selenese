@@ -13,10 +13,7 @@ use Text::MicroTemplate;
 use Template;
 use File::Temp;
 
-use Data::Dumper;
-$Data::Dumper::Indent = 1;
 use HTML::Element;
-use Modern::Perl;
 
 #use overload ('""' => 'as_html');
 
@@ -85,12 +82,8 @@ sub _parse_title {
 sub parse {
     my $self = shift;
 
-    use Data::Dumper;
 
-    #warn Dumper $_;
     # Only parse things once
-    #Carp::cluck "so like I have commands" if scalar @{ $self->commands };
-    #warn "so like I have commands" if scalar @{ $self->commands };
     return if scalar @{ $self->commands };
 
     my $tree = HTML::TreeBuilder->new;
@@ -139,10 +132,6 @@ sub parse {
     # table head
     $self->thead( $self->_parse_thead($tree) );
 
-    #use Data::Dumper;
-    #warn Dumper $tree;
-
-    # <tbody>以下からコマンドを抽出
     return unless my $tbody = $tree->find('tbody');
     my @commands;
     foreach my $trs_comments ( $tbody->find( ( 'tr', '~comment' ) ) ) {
@@ -152,7 +141,6 @@ sub parse {
         }
         elsif ( $trs_comments->tag() eq 'tr' ) {
 
-            # 各<td>についてその下のHTMLを抽出する
             @values = map {
                 my $value = '';
                 foreach my $child ( $_->content_list ) {
@@ -192,7 +180,6 @@ sub as_perl {
     }
     chomp $perl_code;
 
-    # テンプレートに渡すパラメータ
     my @args =
       ( $self->{base_url}, Text::MicroTemplate::encoded_string($perl_code) );
 

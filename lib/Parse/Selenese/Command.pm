@@ -347,8 +347,6 @@ WWW::Selenium::Selenese is
 
 =head2 Functions
 
-=over
-
 =head1 AUTHOR
 
 Theodore Robert Campbell Jr.  E<lt>trcjr@cpan.orgE<gt>

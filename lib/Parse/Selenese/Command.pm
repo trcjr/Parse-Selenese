@@ -1,11 +1,13 @@
+# ABSTRACT: A Selenese Command
+package Parse::Selenese::Command;
 use strict;
+use warnings;
+use Moose;
 use Parse::Selenese::TestCase;
 use Carp ();
 use HTML::TreeBuilder;
 use Template;
 
-package Parse::Selenese::Command;
-use Moose;
 
 has 'values' =>
   ( isa => 'ArrayRef', is => 'rw', required => 0, default => sub { [] } );

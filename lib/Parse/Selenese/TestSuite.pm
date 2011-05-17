@@ -1,7 +1,7 @@
 # ABSTRACT: A Selenese Test Case
-package Parse::Selenese::TestSuite;
 use strict;
 use warnings;
+package Parse::Selenese::TestSuite;
 use Moose;
 use Carp ();
 use File::Basename;

@@ -1,7 +1,7 @@
 # ABSTRACT: A Selenese Command
-package Parse::Selenese::Command;
 use strict;
 use warnings;
+package Parse::Selenese::Command;
 use Moose;
 use Parse::Selenese::TestCase;
 use Carp ();

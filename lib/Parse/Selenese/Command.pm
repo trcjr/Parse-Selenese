@@ -349,15 +349,6 @@ WWW::Selenium::Selenese is
 
 =over
 
-=item C<Parse::Selenese::Command::_get_template()
-Return the 
-
-Return a Parse::Selenese::TestCase, Parse::Selenese::TestSuite or undef if
-unable to parse the filename or content.
-
-=back
-
-
 =head1 AUTHOR
 
 Theodore Robert Campbell Jr.  E<lt>trcjr@cpan.orgE<gt>

@@ -1,4 +1,7 @@
+# ABSTRACT: A Selenese Test Case
 package Parse::Selenese::TestCase;
+use strict;
+use warnings;
 use Moose;
 use Carp ();
 use Cwd;
@@ -14,7 +17,6 @@ use File::Temp;
 use Data::Dumper;
 $Data::Dumper::Indent = 1;
 use HTML::Element;
-use Modern::Perl;
 
 #use overload ('""' => 'as_html');
 

@@ -29,10 +29,10 @@ WWW::Selenium::Selenese is
 
 =over
 
-=item C<Parse::Selenese::parse($filename|$content|%args)>
+=item C<Parse::Selenese::parse($file_name|$content|%args)>
 
 Return a Parse::Selenese::TestCase, Parse::Selenese::TestSuite or undef if
-unable to parse the filename or content.
+unable to parse the file name or content.
 
 =back
 

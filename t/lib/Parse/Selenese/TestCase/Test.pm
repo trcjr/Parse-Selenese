@@ -8,6 +8,7 @@ use Try::Tiny;
 
 sub setup : Tests(setup) {
     my $self = shift;
+    $self->SUPER::setup;
     $self->empty_test_case( Parse::Selenese::TestCase->new() );
 }
 
@@ -88,7 +89,7 @@ sub test_each_stored_selenese_file : Tests {
         $test_selenese_file = File::Spec->abs2rel($test_selenese_file);
         my ( $file, $dir, $ext ) =
           File::Basename::fileparse( $test_selenese_file, qr/\.[^.]*/ );
-        my $yaml_data_file = "$dir/$file.yaml";
+        my $yaml_data_file = "$dir$file.yaml";
 
         # Parse the html file
         $case = Parse::Selenese::parse($test_selenese_file);
@@ -100,7 +101,7 @@ sub test_each_stored_selenese_file : Tests {
         _test_yaml( $case, $yaml_data_file );
 
         # Test against the saved perl
-        my $perl_data_file = "$dir/$file.pl";
+        my $perl_data_file = "$dir$file.pl";
 
         _test_perl( $case, $perl_data_file );
 
@@ -171,7 +172,7 @@ sub _test_selenese {
 }
 
 sub _num_tests_for_case {
-    my $case = shift;
+    my $case       = shift;
     my $test_count = 0;
     for my $idx ( 0 .. @{ $case->commands } - 1 ) {
         my $command        = $case->commands->[$idx];
@@ -194,31 +195,35 @@ sub _test_perl {
               or die "Can't open perl data file";
             $expected = join( '', <$io> );
             close $io;
-        } catch {
-            skip "$perl_data_file not found", $test_count;
+        }
+        catch {
+            #skip "$perl_data_file not found", $test_count;
+            chomp $_;
+            skip $_, $test_count;
         };
         unified_diff;
         eq_or_diff $expected, $case->as_perl,
           $case->filename . ' - selenese output precisely';
-
-        #    use Data::Dumper;
-        #    warn Dumper Algorithm::Diff::diff(
-        #      map [split "\n" => $_], $case->as_perl, $expected
-        #    );
     }
 }
 
 sub _test_yaml {
     my $case           = shift;
     my $yaml_data_file = shift;
-    my $test_count = _num_tests_for_case($case);
+    my $test_count     = _num_tests_for_case($case);
+
+    #./t/test_case_data/hello_world_TestCase.yaml
 
   SKIP: {
         my $yaml_data;
         try {
+            use YAML qw'freeze thaw LoadFile';
             $yaml_data = LoadFile($yaml_data_file);
-        } catch {
-            skip "$yaml_data_file not found", $test_count;
+        }
+        catch {
+            my @reason = split /\n/;
+            $reason[0] =~ s/\\n/ /g;
+            skip $reason[0], $test_count;
         };
 
         # Load the yaml dump that matches
@@ -247,3 +252,67 @@ sub _test_yaml {
 }
 
 1;
+__END__
+
+=head1 NAME
+
+Parse::Selenese::TestCase::Test
+
+=head1 SYNOPSIS
+
+  use Parse::Selenese::TestCase;
+
+=head1 DESCRIPTION
+
+Parse::Selenese::TestCase::Test is a test class for Parse::Selenese::TestCase.
+
+=head2 Functions
+
+=over
+
+=item C<setup()>
+
+Sets the empty_test_case attribute to a new empty test case.
+
+=item C<startup()>
+
+Populates the selenese_data_files attribute with all of the found Selenese files.
+
+=item C<constructor()>
+
+Tests the various ways to construct a Parse::Selenese::TestCase.
+
+=item C<tests_that_should_die()>
+
+Tests the various ways a Parse::Selenese::TestCase should die.
+
+=item C<tests_that_should_live()>
+
+Tests the various ways a Parse::Selenese::TestCase should live.
+
+=item C<test_each_stored_selenese_file()>
+
+Test each file in C<selenese_data_files> in Selenese, Perl and YAML.
+
+=item C<test_save_file()>
+
+Test that we can actually save a Parse::Selenese::TestCase to a Selenese file.
+
+=item C<test_new_from_content()>
+
+Test that we can create a Parse::Selenese::TestCase from a string of content.
+
+=back
+
+=head1 AUTHOR
+
+Theodore Robert Campbell Jr.  E<lt>trcjr@cpan.orgE<gt>
+
+=head1 SEE ALSO
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

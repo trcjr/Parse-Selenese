@@ -1,7 +1,7 @@
 # ABSTRACT: Parser for Selenese
 package Parse::Selenese;
 use strict;
-use Modern::Perl;
+use warnings;
 use Moose;
 use Parse::Selenese::TestCase;
 

@@ -2,19 +2,66 @@ package Parse::Selenese::Command;
 use strict;
 use warnings;
 use Moose;
+use MooseX::AttributeShortcuts;
+use Try::Tiny;
 use Parse::Selenese::TestCase;
 use Carp ();
 use HTML::TreeBuilder;
 use Template;
 
-has 'values' =>
-  ( isa => 'ArrayRef', is => 'rw', required => 0, default => sub { [] } );
+has 'values' => (
+    isa      => 'ArrayRef',
+    is       => 'rw',
+    required => 0,
+    default  => sub { [] }
+);
 
 has 'element' => (
     is      => 'ro',
-    lazy    => 0,
-    builder => '_element',
+    lazy_build => 1,
 );
+
+has 'result' => (
+    isa => 'Str',
+    is  => 'ro',
+    lazy_build => 1,
+    predicate => 1,
+);
+
+has 'content' => (
+    isa       => 'Str',
+    is        => 'rw',
+    required  => 0,
+    clearer   => 1,
+    predicate => 1,
+);
+
+has '_tree' => (
+    isa        => 'HTML::TreeBuilder',
+    is         => 'ro',
+    clearer    => 1,
+    lazy_build => 1,
+);
+
+sub _build__tree {
+    my $self = shift;
+    my $tree = HTML::TreeBuilder->new;
+    $tree->store_comments(1);
+    return $tree;
+}
+
+sub _build_result {
+    my $self = shift;
+    #warn Data::Dumper->Dump( [$self], ['self'] ) if $self->case eq 'Tests/Backroom/logout_of_backroom.html';
+    my $r = '';
+    $r = try {
+        my ($result) = $self->_tree->look_down( '_tag', 'tr')->attr('class') =~ /status_(.*)/;
+        $result;
+    } catch {
+        ""
+    };
+    return $r;
+}
 
 my $_selenese_command_template = <<'END_SELENESE_COMMAND_TEMPLATE';
 <tr>
@@ -170,17 +217,63 @@ my %command_map = (
     },
 );
 
+
 around BUILDARGS => sub {
     my $orig  = shift;
     my $class = shift;
 
     if ( @_ == 1 && ref $_[0] ) {
-        return $class->$orig( values => $_[0], );
+        if ( ref $_[0] eq 'ARRAY') {
+            return $class->$orig( values => $_[0] );
+        } elsif ( ref $_[0] eq 'HTML::Element' ) {
+            return $class->$orig( content => $_[0]->as_HTML );
+        } else {
+            return $class->$orig( content => $_[0] );
+        }
     }
     else {
         return $class->$orig(@_);
     }
 };
+
+sub BUILD {
+    my $self = shift;
+    $self->_parse if $self->has_content;
+}
+
+sub _parse {
+    my $self = shift;
+    $self->_tree->parse( $self->content );
+
+    foreach my $trs_comments ( $self->_tree->find( ( 'tr', '~comment' ) ) ) {
+        my @values;
+        if ( $trs_comments->tag() eq '~comment' ) {
+            @values = ( 'comment', $trs_comments->attr('text'), '' );
+        }
+        elsif ( $trs_comments->tag() eq 'tr' ) {
+
+            @values = map {
+                my $value = '';
+                foreach my $child ( $_->content_list ) {
+
+                    if ( ref($child) && eval { $child->isa('HTML::Element') } ) {
+                        $value .= $child->as_HTML('<>&');
+                    }
+
+                    elsif ( try { $child->attr('_tag') == '~comment' } catch { 0 } )
+                    {
+                        $value .= $child->attr('text');
+                    }
+                    else {
+                        $value .= $child;
+                    }
+                }
+                $value;
+            } $trs_comments->find('td');
+        }
+        $self->values( \@values );
+    }
+}
 
 sub as_perl {
     my $self = shift;
@@ -198,7 +291,7 @@ sub as_perl {
     return $line;
 }
 
-sub _element {
+sub _build_element {
     my $self = shift;
 
     my $element = HTML::Element->new('tr');
@@ -219,7 +312,8 @@ sub _element {
 
 sub _get_selenese_template_for_tag {
     my $self = shift;
-    my $tag = shift // $self->element->tag;
+    my $tag = shift;
+    $tag = $self->element->tag unless $tag;
 
     #my $tag = $self->element->tag;
     my $template = $_selenese_command_template;
@@ -237,6 +331,8 @@ sub as_html {
     $tt->process( \$template, $vars, \$output );
     return Encode::decode_utf8 $output;
 }
+
+sub as_HTML { shift->as_html };
 
 sub turn_func_into_perl {
     my ( $code, @args ) = @_;
@@ -302,8 +398,8 @@ sub make_args {
     }
     else {
         @args =
-          map { $args[$_] // '' } ( 0 .. $code->{args} - 1 );
-        map { s/^exact:// } @args;
+        #map { $args[$_] // '' } ( 0 .. $code->{args} - 1 );
+          map { s/^exact:// } @args;
 
         if ( defined $code->{func} && $code->{func} eq '#' ? 0 : 1 ) {
             $str .= join( ', ', map { quote($_) } @args );

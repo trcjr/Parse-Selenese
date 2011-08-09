@@ -15,17 +15,85 @@ use Text::MicroTemplate;
 use Template;
 use File::Temp;
 use HTML::Element;
+use MooseX::AttributeShortcuts;
 
 my ( $_test_mt, $_selenese_testcase_template, $_selenese_testcase_template2 );
 
-has 'commands' =>
-  ( isa => 'ArrayRef', is => 'rw', required => 0, default => sub { [] } );
-has 'content'  => ( isa => 'Str', is => 'rw', required => 0 );
-has 'filename' => ( isa => 'Str', is => 'rw', required => 0 );
-has 'path'     => ( isa => 'Str', is => 'rw', required => 0 );
-has 'base_url' => ( isa => 'Str', is => 'rw', required => 0 );
-has 'title'    => ( isa => 'Str', is => 'rw', required => 0 );
-has 'thead'    => ( isa => 'Str', is => 'rw', required => 0 );
+has 'commands' => (
+    isa      => 'ArrayRef',
+    is       => 'rw',
+    required => 0,
+    default  => sub { [] }
+);
+
+has [ qw/ content filename / ] => (
+    isa       => 'Str',
+    is        => 'rw',
+    required  => 0,
+    clearer   => 1,
+    predicate => 1,
+);
+has [ qw/ path base_url title thead / ] => (
+    isa       => 'Str',
+    is        => 'rw',
+    required  => 0,
+);
+
+has [ qw/ title thead / ] => (
+    isa        => 'Str',
+    is         => 'ro',
+    clearer    => 1,
+    lazy_build => 1,
+);
+
+has 'result' => (
+    isa => 'Str',
+    is  => 'ro',
+    lazy_build => 1,
+);
+
+has 'log' => (
+    isa => 'Str',
+    is  => 'rw',
+);
+
+has '_tree' => (
+    isa        => 'HTML::TreeBuilder',
+    is         => 'ro',
+    clearer    => 1,
+    lazy_build => 1,
+);
+
+has [qw/ command_passes command_failures /] => (
+    isa        => 'Str',
+    is         => 'ro',
+    lazy_build => 1,
+);
+
+sub _build_command_passes {
+    my $self = shift;
+    return grep { $_->result =~ /passed|done/ } @{ $self->commands };
+}
+
+sub _build_command_failures {
+    my $self = shift;
+    #warn defined $_->has_result for @{ $self->commands };
+    return grep { $_->result !~ /passed|done/ } @{ $self->commands };
+    return grep { defined $_->has_result } @{ $self->commands };
+}
+
+sub _build_result {
+    my $self = shift;
+    my ($result) = $self->_tree->look_down( '_tag', 'tr', 'class', qr/title/ )->attr('class') =~ /status_(.*)/;
+    return $result;
+}
+
+sub _build__tree {
+    my $self = shift;
+    my $tree = HTML::TreeBuilder->new;
+    $tree->store_comments(1);
+    return $tree;
+}
 
 around BUILDARGS => sub {
     my $orig  = shift;
@@ -48,7 +116,7 @@ around BUILDARGS => sub {
 
 sub BUILD {
     my $self = shift;
-    $self->parse if defined $self->filename || defined $self->content;
+    $self->parse if $self->has_filename || $self->has_content;
 }
 
 sub short_name {
@@ -57,11 +125,10 @@ sub short_name {
     return ( File::Basename::fileparse( $x, qr/\.[^.]*/ ) )[0];
 }
 
-sub _parse_thead {
+sub _build_thead {
     my $self    = shift;
-    my $tree    = shift;
     my $content = '';
-    my $thead   = $tree->find('thead');
+    my $thead   = $self->_tree->find('thead');
     if ($thead) {
         my $td = $thead->find( 'td', rowspan => 3 );
         if ($td) {
@@ -71,14 +138,20 @@ sub _parse_thead {
     return $content;
 }
 
-sub _parse_title {
+sub _build_title {
     my $self  = shift;
-    my $tree  = shift;
-    my $title = "";
-    try {
-        $title = $tree->find('title')->content->[0];
+    my $title = try {
+        $self->_tree->find('title')->content->[0];
+    }
+    catch {
+        try {
+            $self->_tree->look_down(
+                '_tag' => 'a',
+                'name' => qr/testresult/,
+            )->as_text;
+        };
     };
-    return $title;
+    return $title || '';
 }
 
 sub parse {
@@ -86,9 +159,6 @@ sub parse {
 
     # Only parse things once
     return if scalar @{ $self->commands };
-
-    my $tree = HTML::TreeBuilder->new;
-    $tree->store_comments(1);
 
     # Dear God this shouldn't be written like this. There _MUST_ be a better
     # way...
@@ -101,73 +171,29 @@ sub parse {
     #    else {
     #        die "file isn't defined";
     #    }
-    if ( defined( $self->filename ) ) {
+    if ( $self->has_filename ) {
         if ( !-r $self->filename ) {
             die "Um, I can't read the file you gave me to parse!";
         }
-        $tree->parse_file( $self->filename );
-    }
-    elsif ( $self->content ) {
-        my $x = $tree->parse_content( Encode::decode_utf8 $self->content );
-        if ( !$x->find('title') ) {
-            die
-"OH GOD THAT THE CONTENT YOU GAVE ME ISN'T EVEN CLOSE TO A TEST CASE!!!";
-        }
-    }
-    elsif ( !defined( $self->content ) || !defined( $self->filename ) ) {
-        die "GIVE ME SOMETHING TO PARSE!";
-    }
-    else {
-        warn "OH MY GOSH!";
+        $self->_tree->parse_file( $self->filename );
+    } else {
+        $self->_tree->parse($self->content);
     }
 
-    foreach my $link ( $tree->find('link') ) {
+    foreach my $link ( $self->_tree->find('link') ) {
         if ( $link->attr('rel') eq 'selenium.base' ) {
             $self->base_url( $link->attr('href') );
         }
     }
 
-    # title
-    $self->title( $self->_parse_title($tree) );
-
-    # table head
-    $self->thead( $self->_parse_thead($tree) );
-
-    return unless my $tbody = $tree->find('tbody');
+    return unless my $tbody = $self->_tree->find('tbody');
     my @commands;
     foreach my $trs_comments ( $tbody->find( ( 'tr', '~comment' ) ) ) {
-        my @values;
-        if ( $trs_comments->tag() eq '~comment' ) {
-            @values = ( 'comment', $trs_comments->attr('text'), '' );
-        }
-        elsif ( $trs_comments->tag() eq 'tr' ) {
-
-            @values = map {
-                my $value = '';
-                foreach my $child ( $_->content_list ) {
-
-                    if ( ref($child) && eval { $child->isa('HTML::Element') } )
-                    {
-                        $value .= $child->as_HTML('<>&');
-                    }
-                    elsif ( eval { $child->can('attr') }
-                        && $child->attr('_tag') == '~comment' )
-                    {
-                        $value .= $child->attr('text');
-                    }
-                    else {
-                        $value .= $child;
-                    }
-                }
-                $value;
-            } $trs_comments->find('td');
-        }
-
-        my $command = Parse::Selenese::Command->new( \@values );
+        my $command = Parse::Selenese::Command->new( $trs_comments );
         push( @commands, $command );
     }
     $self->commands( \@commands );
-    $tree = $tree->delete;
+#$tree = $tree->delete;
 }
 
 sub as_perl {

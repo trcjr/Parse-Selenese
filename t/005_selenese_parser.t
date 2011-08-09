@@ -1,3 +1,5 @@
+use strict;
+use warnings;
 use Algorithm::Diff;
 use Cwd;
 use Data::Dumper;
@@ -5,7 +7,6 @@ use File::Basename;
 use File::Find qw(find);
 use File::Spec;
 use FindBin;
-use Modern::Perl;
 use Test::Exception;
 
 #use Test::Most tests => 2;

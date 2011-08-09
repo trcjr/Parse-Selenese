@@ -42,3 +42,43 @@ sub shutdown : Tests(shutdown) {
 }
 
 1;
+__END__
+
+=head1 NAME
+
+Parse::Selenese::Base
+
+=head1 SYNOPSIS
+
+  use Parse::Selenese::Base;
+
+=head1 DESCRIPTION
+
+Parse::Selenese::Base is the base class for the test classes for Parse::Selenese.
+
+=head2 Functions
+
+=over
+
+=item C<setup()>
+
+Empty method.
+
+=item C<startup()>
+
+Empty method.
+
+=back
+
+=head1 AUTHOR
+
+Theodore Robert Campbell Jr.  E<lt>trcjr@cpan.orgE<gt>
+
+=head1 SEE ALSO
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

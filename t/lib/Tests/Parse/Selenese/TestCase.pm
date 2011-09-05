@@ -1,5 +1,5 @@
-package Parse::Selenese::TestCase::Test;
-use Test::Class::Most parent => 'Parse::Selenese::Base';
+package Tests::Parse::Selenese::TestCase;
+use Test::Class::Most parent => 'Tests::Parse::Selenese::Base';
 use Parse::Selenese;
 use Parse::Selenese::TestCase;
 use FindBin;

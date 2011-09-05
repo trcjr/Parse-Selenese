@@ -1,4 +1,4 @@
-package Parse::Selenese::Base;
+package Tests::Parse::Selenese::Base;
 use strict;
 use warnings;
 

@@ -1,6 +1,7 @@
-package Parse::Selenese::Command;
+# ABSTRACT: A Selenese Command
 use strict;
 use warnings;
+package Parse::Selenese::Command;
 use Moose;
 use MooseX::AttributeShortcuts;
 use Try::Tiny;
@@ -440,17 +441,6 @@ Parse::Selenese -
 WWW::Selenium::Selenese is
 
 =head2 Functions
-
-=over
-
-=item C<Parse::Selenese::Command::_get_template()
-Return the 
-
-Return a Parse::Selenese::TestCase, Parse::Selenese::TestSuite or undef if
-unable to parse the filename or content.
-
-=back
-
 
 =head1 AUTHOR
 

@@ -1,3 +1,6 @@
+# ABSTRACT: A Selenese Test Case
+use strict;
+use warnings;
 package Parse::Selenese::TestCase;
 use strict;
 use warnings;

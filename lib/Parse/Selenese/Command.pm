@@ -392,16 +392,13 @@ EOF
 
 sub make_args {
     my ( $code, @args ) = @_;
-
     my $str = '';
     if ( $code->{force_args} ) {
         $str .= join( ', ', map { quote($_) } @{ $code->{force_args} } );
     }
     else {
-        @args =
-        #map { $args[$_] // '' } ( 0 .. $code->{args} - 1 );
-          map { s/^exact:// } @args;
-
+        my @args = map { $args[$_] // '' } ( 0 .. $code->{args} - 1 );
+        map { s/^exact:// } @args;
         if ( defined $code->{func} && $code->{func} eq '#' ? 0 : 1 ) {
             $str .= join( ', ', map { quote($_) } @args );
         }

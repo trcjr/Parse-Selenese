@@ -179,8 +179,12 @@ sub parse {
             die "Um, I can't read the file you gave me to parse!";
         }
         $self->_tree->parse_file( $self->filename );
-    } else {
-        $self->_tree->parse($self->content);
+    }
+    elsif ( $self->has_content ) {
+        $self->_tree->parse( $self->content );
+    }
+    else {
+        die "Must specifiy either content or filename";
     }
 
     foreach my $link ( $self->_tree->find('link') ) {

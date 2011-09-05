@@ -87,8 +87,7 @@ sub test_each_stored_selenese_file : Tests {
 
     foreach my $test_selenese_file ( @{ $self->selenese_data_files } ) {
         $test_selenese_file = File::Spec->abs2rel($test_selenese_file);
-        my ( $file, $dir, $ext ) =
-          File::Basename::fileparse( $test_selenese_file, qr/\.[^.]*/ );
+        my ( $file, $dir, $ext ) = File::Basename::fileparse( $test_selenese_file, qr/\.[^.]*/ );
         my $yaml_data_file = "$dir$file.yaml";
 
         # Parse the html file
@@ -129,8 +128,9 @@ sub test_save_file : Tests {
 
     # Change the filename of the new case to match that of our control
     $new_case->filename( $c->filename );
-    is_deeply( $c, $new_case,
-        "Parsing saved case gives an equilivent to the original case" );
+
+    is_deeply( $new_case->as_html, $c->as_html, "Parsing saved case gives an equilivent to the original case Selenese" );
+    is_deeply( $new_case->as_perl, $c->as_perl, "Parsing saved case gives an equilivent to the original case Perl" );
     lives_ok {
         $new_case->save($fname);
     }
@@ -160,15 +160,11 @@ sub _test_selenese {
     my $content = join( '', <$io> );
     close $io;
     my $case2 = Parse::Selenese::TestCase->new( content => $content );
-
-    my $case3 =
-      Parse::Selenese::TestCase->new( filename => $test_selenese_file );
+    my $case3 = Parse::Selenese::TestCase->new( filename => $test_selenese_file );
     $case3->parse;
 
-    eq_or_diff $content, $case->as_html,
-      $case->filename . ' - selenese output precisely';
-    eq_or_diff $case->as_html, $case2->as_html,
-      $case->filename . ' - as_html reparsed still is the same';
+    eq_or_diff $case->as_html, $content, $case->filename . ' - selenese output precisely';
+    eq_or_diff $case2->as_html, $case->as_html, $case->filename . ' - as_html reparsed still is the same';
 }
 
 sub _num_tests_for_case {
@@ -202,8 +198,7 @@ sub _test_perl {
             skip $_, $test_count;
         };
         unified_diff;
-        eq_or_diff $expected, $case->as_perl,
-          $case->filename . ' - selenese output precisely';
+        eq_or_diff $case->as_perl, $expected, $case->filename . ' - perl output precisely';
     }
 }
 

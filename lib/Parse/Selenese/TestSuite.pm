@@ -8,12 +8,16 @@ use File::Basename;
 use HTML::TreeBuilder;
 use Parse::Selenese::TestCase;
 
-has 'cases' =>
-  ( isa => 'ArrayRef', is => 'rw', required => 0, default => sub { [] } );
+has 'cases' => (
+    isa      => 'ArrayRef',
+    is       => 'rw',
+    required => 0,
+    default  => sub { [] },
+);
 
 # Return whether the specified file is a test suite or not
 # static method
-sub is_suite_file {
+sub _is_suite_file {
     my ($filename) = @_;
 
     die "Can' t read $filename " unless -r $filename;
@@ -36,26 +40,8 @@ sub bulk_convert {
     return @outfiles;
 }
 
-# Return TestCase objects in the specified suite
-sub get_cases {
-    __PACKAGE__->new(shift)->cases;
-}
-
-# Return test case filenames in the specified suite
-sub get_case_files {
+sub case_file_names {
     map { $_->{filename} } __PACKAGE__->new(shift)->cases;
-}
-
-sub new_o {
-    my ( $class, $filename ) = @_;
-    my $self = bless {
-        filename => $filename,
-        cases    => undef,
-    }, $class;
-
-    $self->parse if $filename;
-
-    $self;
 }
 
 sub parse {
@@ -89,9 +75,9 @@ sub parse {
                         $base_dir . '/' . $link->attr('href') );
                 };
                 if ($@) {
-                    warn " Can't read test case $base_dir /
-  " . $link->attr('href') . "
-  : $! \n ";
+                    warn " Can't read test case $base_dir / "
+                      . $link->attr('href')
+                      . " : $! \n ";
                 }
                 push( @cases, $case ) if $case;
             }
@@ -103,3 +89,66 @@ sub parse {
 }
 
 1;
+__END__
+
+=head1 NAME
+
+Parse::Selenese::TestSuite
+
+=head1 SYNOPSIS
+
+  use Parse::Selenese::TestSuite;
+  my $testsuite = Parse::Selenese::TestSuite->new(filename => $some_file_name);
+  my $testsuite = Parse::Selenese::TestSuite->new(content => $string);
+
+=head1 DESCRIPTION
+
+Parse::Selenese::TestSuite is a representation of a Selenium Selenese Test Suite.
+
+=head2 Functions
+
+=over
+
+=item C<BUILD>
+
+Moose method that runs after object initialization and attempts to parse
+whatever content was provided.
+
+=item C<as_html>
+
+Return the test suite in HTML (Selenese) format.
+
+=item C<as_HTML>
+
+An alias to C<as_html>
+
+=item C<as_perl>
+
+Return the test suite as a string of Perl.
+
+=item C<bulk_convert>
+
+Return an array of C<Parse::Selenese::TestCase>s.
+
+=item C<parse>
+
+Parse the test suite from the file name or content that was previously set
+
+=item C<case_file_names>
+
+Return the file names for all test cases in the suite.
+
+=back
+
+=head1 AUTHOR
+
+Theodore Robert Campbell Jr E<lt>trcjr@cpan.orgE<gt>
+
+=head1 SEE ALSO
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

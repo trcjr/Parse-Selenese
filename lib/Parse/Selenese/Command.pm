@@ -284,7 +284,7 @@ sub as_perl {
     my @args = @{ $self->{values} };
     shift @args;
     if ($code) {
-        $line = turn_func_into_perl( $code, @args );
+        $line = _turn_func_into_perl( $code, @args );
     }
     if ($line) {
         $line .= "\n";
@@ -335,19 +335,19 @@ sub as_html {
 
 sub as_HTML { shift->as_html };
 
-sub turn_func_into_perl {
+sub _turn_func_into_perl {
     my ( $code, @args ) = @_;
 
     my $line = '';
     if ( ref( $code->{func} ) eq 'ARRAY' ) {
         foreach my $subcode ( @{ $code->{func} } ) {
             $line .= "\n" if $line;
-            $line .= turn_func_into_perl( $subcode, @args );
+            $line .= _turn_func_into_perl( $subcode, @args );
         }
     }
     else {
         if ( defined $code->{func} && $code->{func} eq '#' ) {
-            $line = $code->{func} . make_args( $code, @args );
+            $line = $code->{func} . _make_args( $code, @args );
         }
         elsif ( defined $code->{store} && $code->{store} ) {
             my $varname = pop @args;
@@ -356,15 +356,15 @@ sub turn_func_into_perl {
                 $line .=
                     "\$sel->"
                   . $code->{func} . '('
-                  . make_args( $code, @args ) . ');';
+                  . _make_args( $code, @args ) . ');';
             }
             else {
-                $line .= make_args( $code, @args ) . ";";
+                $line .= _make_args( $code, @args ) . ";";
             }
         }
         else {
             $line =
-              '$sel->' . $code->{func} . '(' . make_args( $code, @args ) . ');';
+              '$sel->' . $code->{func} . '(' . _make_args( $code, @args ) . ');';
         }
 
         #        if ( $code->{repeat} ) {
@@ -390,27 +390,32 @@ EOF
     return $line;
 }
 
-sub make_args {
+sub _make_args {
     my ( $code, @args ) = @_;
     my $str = '';
     if ( $code->{force_args} ) {
-        $str .= join( ', ', map { quote($_) } @{ $code->{force_args} } );
+        $str .= join( ', ', map { _quote($_) } @{ $code->{force_args} } );
     }
     else {
         my @args = map { $args[$_] // '' } ( 0 .. $code->{args} - 1 );
-        map { s/^exact:// } @args;
+        my @a;
+        foreach my $arg (@args) {
+            $arg =~ s/^exact://;
+            $arg = _quote($arg);
+            push @a, $arg;
+        }
+        @args = @a;
         if ( defined $code->{func} && $code->{func} eq '#' ? 0 : 1 ) {
-            $str .= join( ', ', map { quote($_) } @args );
+            $str .= join( ', ', @args);
         }
         else {
             $str .= join( ', ', @args );
         }
     }
-
     return $str;
 }
 
-sub quote {
+sub _quote {
     my $str        = shift;
     my $quote_char = shift;
 
@@ -427,7 +432,7 @@ __END__
 
 =head1 NAME
 
-Parse::Selenese -
+Parse::Selenese - Parse Selenium Selenese Test Cases and Suites
 
 =head1 SYNOPSIS
 
@@ -435,13 +440,35 @@ Parse::Selenese -
 
 =head1 DESCRIPTION
 
-WWW::Selenium::Selenese is
+Parse::Selenese consumes Selenium Selenese Test Cases and Suites and can turn
+them into Perl.
 
 =head2 Functions
 
+=over
+
+=item C<BUILD>
+
+Moose method that runs after object initialization and attempts to parse
+whatever content was provided.
+
+=item C<as_html>
+
+Return the command in HTML (Selenese) format.
+
+=item C<as_HTML>
+
+An alias to C<as_html>
+
+=item C<as_perl>
+
+Return the command as a string of Perl.
+
+=back
+
 =head1 AUTHOR
 
-Theodore Robert Campbell Jr.  E<lt>trcjr@cpan.orgE<gt>
+Theodore Robert Campbell Jr E<lt>trcjr@cpan.orgE<gt>
 
 =head1 SEE ALSO
 

@@ -6,4 +6,4 @@ commands:
       - opentoast
       - /
       - ''
-filename: t/test_case_data/invalid_commands_TestCase.html
+filename: t/data/invalid_commands_TestCase.html

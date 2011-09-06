@@ -17,7 +17,7 @@ sub startup : Tests(startup) {
     $self->selenese_data_files(
         sub {
             my @selenese_data_files;
-            my $case_data_dir = "$FindBin::Bin/test_case_data";
+            my $case_data_dir = "$FindBin::Bin/data";
             find sub {
                 push @selenese_data_files, $File::Find::name
                   if /_TestCase\.html$/;
@@ -154,7 +154,7 @@ sub _test_selenese {
     my $test_selenese_file = shift;
 
     # do not test the known malformed cases.
-    return if $test_selenese_file =~ /malformed/;
+    return if $test_selenese_file =~ /mal_/;
 
     open my $io, '<:encoding(utf8)', $test_selenese_file;
     my $content = join( '', <$io> );
@@ -206,8 +206,6 @@ sub _test_yaml {
     my $case           = shift;
     my $yaml_data_file = shift;
     my $test_count     = _num_tests_for_case($case);
-
-    #./t/test_case_data/hello_world_TestCase.yaml
 
   SKIP: {
         my $yaml_data;

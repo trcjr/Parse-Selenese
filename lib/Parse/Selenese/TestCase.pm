@@ -298,5 +298,67 @@ END_SELENESE_TESTCASE_TEMPLATE
 1;
 __END__
 
-=head1 Parse Selenium
-I like to parse selenium
+=head1 NAME
+
+Parse::Selenese::TestCase
+
+=head1 SYNOPSIS
+
+  use Parse::Selenese::TestCase;
+  my $testcase = Parse::Selenese::TestCase->new(filename => $some_file_name);
+  my $testcase = Parse::Selenese::TestCase->new(content => $string);
+
+  $testcase->as_perl; # Turn the case into Perl.
+  warn "Has an open" if grep { $_->name } @{ $testcase->commands };
+
+=head1 DESCRIPTION
+
+Parse::Selenese::TestCase is a representation of a Selenium Selenese Test Case.
+
+=head2 Functions
+
+=over
+
+=item C<BUILD>
+
+Moose method that runs after object initialization and attempts to parse
+whatever content was provided.
+
+=item C<as_html>
+
+Return the test case in HTML (Selenese) format.
+
+=item C<as_HTML>
+
+An alias to C<as_html>
+
+=item C<as_perl>
+
+Return the test case as a string of Perl.
+
+=item C<save([file_name])>
+
+Save the test case.
+
+=item C<short_name>
+
+The file name of the test case.
+
+=item C<parse>
+
+Parse the test case from the file name or content that was previously set
+
+=back
+
+=head1 AUTHOR
+
+Theodore Robert Campbell Jr E<lt>trcjr@cpan.orgE<gt>
+
+=head1 SEE ALSO
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

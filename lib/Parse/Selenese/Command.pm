@@ -401,17 +401,20 @@ sub _make_args {
         my @a;
         foreach my $arg (@args) {
             $arg =~ s/^exact://;
-            $arg = _quote($arg);
             push @a, $arg;
         }
-        @args = @a;
         if ( defined $code->{func} && $code->{func} eq '#' ? 0 : 1 ) {
-            $str .= join( ', ', @args);
+            my @_args;
+            foreach my $arg (@a) {
+                push @_args, _quote($arg);
+            }
+            $str .= join( ', ', @_args);
         }
         else {
-            $str .= join( ', ', @args );
+            $str .= join( ', ', @a );
         }
     }
+
     return $str;
 }
 

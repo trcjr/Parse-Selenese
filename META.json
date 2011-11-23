@@ -74,19 +74,19 @@
    "provides" : {
       "Parse::Selenese" : {
          "file" : "lib/Parse/Selenese.pm",
-         "version" : "0.004"
+         "version" : "0.005"
       },
       "Parse::Selenese::Command" : {
          "file" : "lib/Parse/Selenese/Command.pm",
-         "version" : "0.004"
+         "version" : "0.005"
       },
       "Parse::Selenese::TestCase" : {
          "file" : "lib/Parse/Selenese/TestCase.pm",
-         "version" : "0.004"
+         "version" : "0.005"
       },
       "Parse::Selenese::TestSuite" : {
          "file" : "lib/Parse/Selenese/TestSuite.pm",
-         "version" : "0.004"
+         "version" : "0.005"
       }
    },
    "release_status" : "stable",
@@ -102,6 +102,6 @@
          "web" : "https://github.com/trcjr/Parse-Selenese"
       }
    },
-   "version" : "0.004"
+   "version" : "0.005"
 }
 

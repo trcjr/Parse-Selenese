@@ -1,9 +1,5 @@
 # ABSTRACT: A Selenese Test Case
-use strict;
-use warnings;
 package Parse::Selenese::TestCase;
-use strict;
-use warnings;
 use Moose;
 use Carp ();
 use open ':encoding(utf8)';
@@ -19,6 +15,8 @@ use Template;
 use File::Temp;
 use HTML::Element;
 use MooseX::AttributeShortcuts;
+
+# VERSION
 
 my ( $_test_mt, $_selenese_testcase_template, $_selenese_testcase_template2 );
 

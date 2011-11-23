@@ -1,9 +1,9 @@
 # ABSTRACT: Parser for Selenese
-use strict;
-use warnings;
 package Parse::Selenese;
 use Moose;
 use Parse::Selenese::TestCase;
+
+# VERSION
 
 sub parse {
     Parse::Selenese::TestCase->new(shift);

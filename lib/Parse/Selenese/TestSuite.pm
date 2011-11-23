@@ -1,12 +1,12 @@
 # ABSTRACT: A Selenese Test Case
-use strict;
-use warnings;
 package Parse::Selenese::TestSuite;
 use Moose;
 use Carp ();
 use File::Basename;
 use HTML::TreeBuilder;
 use Parse::Selenese::TestCase;
+
+# VERSION
 
 has 'cases' => (
     isa      => 'ArrayRef',

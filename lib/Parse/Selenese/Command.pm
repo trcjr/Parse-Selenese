@@ -1,6 +1,4 @@
 # ABSTRACT: A Selenese Command
-use strict;
-use warnings;
 package Parse::Selenese::Command;
 use Moose;
 use MooseX::AttributeShortcuts;
@@ -9,6 +7,8 @@ use Parse::Selenese::TestCase;
 use Carp ();
 use HTML::TreeBuilder;
 use Template;
+
+# VERSION
 
 has 'values' => (
     isa      => 'ArrayRef',

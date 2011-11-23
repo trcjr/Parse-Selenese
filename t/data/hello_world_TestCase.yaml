@@ -42,4 +42,7 @@ commands:
       - clickAndWait
       - 'link=Hello world program - Wikipedia, the free encyclopedia'
       - ''
-filename: t/data/hello_world_TestCase.html
+file_path_parts:
+  - t
+  - data
+  - hello_world_TestCase.html

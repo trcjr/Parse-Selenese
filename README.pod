@@ -1,0 +1,74 @@
+=pod
+
+=head1 NAME
+
+Parse::Selenese - Parser for Selenese
+
+=head1 VERSION
+
+version 0.2.2
+
+=head1 SYNOPSIS
+
+  use Parse::Selenese;
+
+=head1 DESCRIPTION
+
+WWW::Selenium::Selenese is
+
+=head2 Functions
+
+=over
+
+=item C<Parse::Selenese::parse($file_name|$content|%args)>
+
+Return a Parse::Selenese::TestCase, Parse::Selenese::TestSuite or undef if
+unable to parse the file name or content.
+
+=back
+
+=head1 NAME
+
+Parse::Selenese -
+
+=head1 AUTHOR
+
+Theodore Robert Campbell Jr.  E<lt>trcjr@cpan.orgE<gt>
+
+=head1 SEE ALSO
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders
+
+=head1 SUPPORT
+
+=head2 Bugs / Feature Requests
+
+Please report any bugs or feature requests by email to C<bug-parse-selenese at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/Public/Dist/Display.html?Name=Parse-Selenese>. You will be automatically notified of any
+progress on the request by the system.
+
+=head2 Source Code
+
+This is open source software.  The code repository is available for
+public review and contribution under the terms of the license.
+
+L<https://github.com/trcjr/Parse-Selenese>
+
+  git clone https://github.com/trcjr/Parse-Selenese.git
+
+=head1 AUTHOR
+
+Theodore Robert Campbell Jr <trcjr@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2011 by Theodore Robert Campbell Jr.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+

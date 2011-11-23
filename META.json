@@ -45,9 +45,7 @@
             "Text::MicroTemplate" : 0,
             "Try::Tiny" : 0,
             "open" : 0,
-            "perl" : "5.010",
-            "strict" : 0,
-            "warnings" : 0
+            "perl" : "5.010"
          }
       },
       "test" : {
@@ -67,26 +65,28 @@
             "Test::WWW::Selenium" : 0,
             "Time::HiRes" : 0,
             "YAML" : 0,
-            "utf8" : 0
+            "strict" : 0,
+            "utf8" : 0,
+            "warnings" : 0
          }
       }
    },
    "provides" : {
       "Parse::Selenese" : {
          "file" : "lib/Parse/Selenese.pm",
-         "version" : "v0.2.2"
+         "version" : "0.003"
       },
       "Parse::Selenese::Command" : {
          "file" : "lib/Parse/Selenese/Command.pm",
-         "version" : "v0.2.2"
+         "version" : "0.003"
       },
       "Parse::Selenese::TestCase" : {
          "file" : "lib/Parse/Selenese/TestCase.pm",
-         "version" : "v0.2.2"
+         "version" : "0.003"
       },
       "Parse::Selenese::TestSuite" : {
          "file" : "lib/Parse/Selenese/TestSuite.pm",
-         "version" : "v0.2.2"
+         "version" : "0.003"
       }
    },
    "release_status" : "stable",
@@ -102,6 +102,6 @@
          "web" : "https://github.com/trcjr/Parse-Selenese"
       }
    },
-   "version" : "0.2.2"
+   "version" : "0.003"
 }
 

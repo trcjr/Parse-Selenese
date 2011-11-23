@@ -1,0 +1,56 @@
+Revision History for Parse-Selenese
+===================================
+
+v0.003 2011-11-23
+-----------------
+
+ Added VERSION comments
+ We seem to need these now
+ tests should pass on Win32 systems now.
+ Version bump
+
+release-0.002 2011-09-05
+------------------------
+
+ no more fake release
+ Make perlcritic more happy
+ Renamed test data and refactored to make xtests happy
+ Lets try this whole releasing thing for real.
+ Changed testcase layout
+ Passing tests again
+ Merge remote-tracking branch 'origin/develop' into develop
+ zong
+ Use dagolden's Dist::Zilla profile
+ Making perl critic happy
+ pod correction
+ spelling
+ removed bobo pod
+ Moved use statments around
+ Don't use Modern::Perl, we don't want to force 5.10 (yet)
+ setup is where it shoudl be
+ Now with Try::Tiny and less duplicate code.
+ No tests for this yet
+ keep the empty setup method
+ Now havea base class
+ Renamed to Base
+ Actually use Test::Class properly
+ Renamed
+ Removed comments and blank lines
+ perltidy
+ Changed to an empty title
+ Removed comment
+ Change _parse_title to use Try::Tiny.
+ Test for saving test cases
+ Malformed test cases
+ use strict, warnings
+ Removed duplicate Data::Dumper uses.
+ Reduce redundant calls to tree objects.
+ Use utf8 encoding when when open files.
+ Removed multiple Data::Dumpers
+ strict, warnings
+ use warnings, moved package declaration up, make elements non-lazy.
+ Removed test
+
+===================================
+End of changes in the last 365 days
+===================================

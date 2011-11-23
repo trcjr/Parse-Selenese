@@ -6,7 +6,7 @@ Parse::Selenese - Parser for Selenese
 
 =head1 VERSION
 
-version 0.2.2
+version 0.003
 
 =head1 SYNOPSIS
 

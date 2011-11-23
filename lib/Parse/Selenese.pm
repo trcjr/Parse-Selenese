@@ -15,7 +15,7 @@ __END__
 
 =head1 NAME
 
-Parse::Selenese -
+Parse::Selenese - Easy Selenium Test Suite and Test Case parsing.
 
 =head1 SYNOPSIS
 
@@ -23,7 +23,8 @@ Parse::Selenese -
 
 =head1 DESCRIPTION
 
-WWW::Selenium::Selenese is
+Parse::Selenese makes it easy to parse Selenium Test Suites and Test Cases from
+their HTML format into Perl.
 
 =head2 Functions
 

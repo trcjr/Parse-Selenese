@@ -2,9 +2,12 @@ package Tests::Parse::Selenese::TestCase;
 use Test::Class::Most parent => 'Tests::Parse::Selenese::Base';
 use Parse::Selenese;
 use Parse::Selenese::TestCase;
+use Path::Class;
 use FindBin;
 use File::Find qw(find);
 use Try::Tiny;
+use File::Temp ();
+use Data::Dumper;
 
 sub setup : Tests(setup) {
     my $self = shift;
@@ -109,11 +112,9 @@ sub test_each_stored_selenese_file : Tests {
 
 sub test_save_file : Tests {
     my $self = shift;
-    use File::Temp ();
 
-    my $c =
-      Parse::Selenese::TestCase->new(
-        filename => $self->selenese_data_files->[0] );
+    my ($f) = grep { /hello_world_TestCase/ } @{ $self->selenese_data_files };
+    my $c = Parse::Selenese::TestCase->new( filename => $f );
 
     my $fh    = File::Temp->new();
     my $fname = $fh->filename;
@@ -222,8 +223,9 @@ sub _test_yaml {
         # Load the yaml dump that matches
         is $case->short_name => $yaml_data->{short_name},
           $case->filename . " test case short name";
-
-        is $case->filename => $yaml_data->{filename},
+        my $want_file_name =
+          Path::Class::File->new( @{ $yaml_data->{file_path_parts} } )->stringify;
+        is $case->filename => $want_file_name,
           $case->filename . " filename";
         is $case->base_url => $yaml_data->{base_url},
           $case->filename . " base_url";

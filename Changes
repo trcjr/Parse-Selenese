@@ -2,6 +2,7 @@ Revision History for Parse-Selenese
 
 {{$NEXT}}
 
+tests should pass on Win32 systems now.
 
 release-0.002 2011-09-05
 ------------------------

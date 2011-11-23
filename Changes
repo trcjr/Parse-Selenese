@@ -1,13 +1,7 @@
 Revision History for Parse-Selenese
-===================================
 
-v0.003 2011-11-23
------------------
+{{$NEXT}}
 
- Added VERSION comments
- We seem to need these now
- tests should pass on Win32 systems now.
- Version bump
 
 release-0.002 2011-09-05
 ------------------------

@@ -397,7 +397,7 @@ sub _make_args {
         $str .= join( ', ', map { _quote($_) } @{ $code->{force_args} } );
     }
     else {
-        my @args = map { $args[$_] // '' } ( 0 .. $code->{args} - 1 );
+        my @args = map { defined $args[$_] ? $args[$_] : '' } ( 0 .. $code->{args} - 1 );
         my @a;
         foreach my $arg (@args) {
             $arg =~ s/^exact://;
